@@ -7,22 +7,19 @@ with open("README.md", "r") as fh:
 
 # setuptools.setup(
 setup(
-    name="qcrad",
+    name="luxeics",
     version="0.2",
     author="Daniel Seipt",
     author_email="d.seipt@gsi.de",
-    description="ICS simulations, calculate quasi-classical radiation spectra from trajectories",
-    # long_description=long_description,
-    # long_description_content_type="text/markdown",
-    # url          = 'https://github.com/danielseipt/rotating_cascade.git',
-    packages     = ['qcrad'] ,
-    package_dir  = {'qcrad' : 'qcrad'},
+    description="ICS simulations for LUXE",
+    url          = 'https://github.com/danielseipt/luxeics.git',
+    packages     = ['luxeics'] ,
+    package_dir  = {'luxeics' : 'luxeics'},
     install_requires=[
-          'numpy',
-          'scipy',
-          'matplotlib',
-          'mpmath'
-      ],
+                'numpy',
+                'scipy',
+                'matplotlib'
+                ],
     test_suite='nose.collector',
     tests_require=['nose'],
 )

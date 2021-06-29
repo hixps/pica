@@ -1,0 +1,37 @@
+---
+control:
+  mode:         full
+  name:         large_beam_full
+  radiation:    KN
+  # energyaverage: True
+
+  # rescaling of pulse duration for better emittance integration
+  laser:
+    sigma_rescale: False
+    sigma_crit:    500.
+  # sampling:      rejection
+
+beam:
+  gamma:        32289.62818003914
+  energyspread: 1e-3
+  theta:        0.
+  emittance:    1.5       # mm mrad
+  sigmaT:       25.        # micron, transverse beam size
+  sigmaL:       20.       # micron, longitduinal beam size
+  beam_charge:  100e-12   # beam charge in Coulomb
+
+
+laser:
+  a0:     0.1                 # normalized laser vector potential
+  omega0: 4.1                 # eV, laser frequency 
+  Tpulse: 100.0               # fs, FWHM laser pulse duration
+  pol:    0.7853981633974483  # polarization parameter, CP
+  pulse:  cos2                # pulse envelope function, only cos2 supported so far
+  w0:     25.                 # micron, rms laser spot size
+
+detector:                    # spectrum calculation
+  pdim:  2                   # number of detector dimensions for spectrum calculation
+  omega: [5.0e9,9.2e9,300]   # [omegamin,omegamax,Nomega] , eV
+  theta: [0,15e-6,110]       # [thetamin,thetamax,Ntheta] , rad
+  phi:   0.0                 # phi
+

@@ -1,24 +1,32 @@
 ---
 control:
-  mode:         full
-  name:         large_beam_full
-  radiation:    KN
-  # energyaverage: True
+  mode:           full            # don't change
+  name:           large_beam_full # naming of output files
+  radiation:      KN              # KN==Klein-Nishina cross section ... don't change
+  energyaverage:  False           # True to perform energy integral over energy spread, if False just use mean energy gamma
+
+  sampling:         rejection     # rejection or weight
+  sample_electrons: 1e8           # total number of electrons to sample
+
 
   # rescaling of pulse duration for better emittance integration
   laser:
     sigma_rescale: False
     sigma_crit:    500.
-  # sampling:      rejection
+
+  beam:
+    Nenergy:        7         # number of nodes for energy spread integration
+    Nemit:          30        # number of nodes per transverse emittance direction, technical parameter, needs to be large enough for given laser pulse duration
+
 
 beam:
   gamma:        32289.62818003914
   energyspread: 1e-3
   theta:        0.
-  emittance:    1.5       # mm mrad
+  emittance:    1.5        # mm mrad
   sigmaT:       25.        # micron, transverse beam size
-  sigmaL:       20.       # micron, longitduinal beam size
-  beam_charge:  100e-12   # beam charge in Coulomb
+  sigmaL:       20.        # micron, longitduinal beam size
+  beam_charge:  100e-12    # beam charge in Coulomb
 
 
 laser:

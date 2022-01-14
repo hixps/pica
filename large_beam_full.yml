@@ -3,6 +3,7 @@ control:
   mode:           full            # don't change
   name:           large_beam_full # naming of output files
   radiation:      KN              # KN==Klein-Nishina cross section ... don't change
+  folder: T_Puslse_Parameter_Run  #Folder to save the Yml and h5 files
   energyaverage:  False           # True to perform energy integral over energy spread, if False just use mean energy gamma
 
   sampling:         rejection     # rejection or weight
@@ -23,10 +24,13 @@ beam:
   gamma:        32289.62818003914
   energyspread: 1e-3
   theta:        0.
-  emittance:    1.5        # mm mrad
-  sigmaT:       25.        # micron, transverse beam size
+  emittance:    1.4        # mm mrad
+  sigmaX:       5.        # micron, transverse beam size
+  sigmaY:       5.        # micron, transverse beam size
   sigmaL:       20.        # micron, longitduinal beam size
   beam_charge:  100e-12    # beam charge in Coulomb
+  L: 0                     #Focus of electron Beam 
+  baseline: 7.5e6          #Distance between ICS and Stong IP
 
 
 laser:

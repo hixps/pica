@@ -1,0 +1,6 @@
+First Run:
+
+In this run, the electron beam was focussed at the Strong Laser IP which is set a 7.5 m after the interaction point of the laser and the electron beam. 
+
+Electron Beam was focussed to 5 microns ( sigmaX=sigmaY ) and the focus of the Laser beam was increased from 5 micorns to 20 microns in steps of 1 micron while
+ keeping then pulse energy constant to a 100 mJ                        

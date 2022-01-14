@@ -1,0 +1,50 @@
+---
+control:
+  mode:           full            # don't change
+  name:           small_beam_full # naming of output files
+  radiation:      KN              # KN==Klein-Nishina cross section ... don't change
+  energyaverage:  False           # True to perform energy integral over energy spread, if False just use mean energy gamma
+  folder: First_Run_Smaller_Det
+  sampling:         rejection     # rejection or weight
+  sample_electrons: 1e9         # total number of electrons to sample
+
+
+
+  # rescaling of pulse duration for better emittance integration
+  laser:
+    sigma_rescale: False
+    sigma_crit:    800.
+  # sampling:      rejection
+  beam:
+    Nenergy:        7         # number of nodes for energy spread integration
+    Nemit:          30        # number of nodes per transverse emittance direction, technical parameter, needs to be large enough for given laser pulse duration
+
+
+
+
+beam:
+  gamma:        32289.62818003914
+  energyspread: 1e-3
+  theta:        0.
+  emittance:    1.4       # mm mrad
+  sigmaX:       5.        # micron, transverse beam size
+  sigmaY:       5.        # micron, transverse beam size
+  sigmaL:       20.       # micron, longitduinal beam size
+  beam_charge:  100e-12   # beam charge in Coulomb
+  L: 7.5e6
+  baseline: 7.5e6
+laser:
+  a0:     0.09223328399498794                # normalized laser vector potential
+  omega0: 4.1                 # eV, laser frequency 
+  Tpulse: 1000.0               # fs, FWHM laser pulse duration
+  pol:    0.7853981633974483  # polarization parameter, CP
+  pulse:  cos2                # pulse envelope function, only cos2 supported so far
+  #w0:     25.                 # micron, rms laser spot size
+  w0:     5.                 # micron, rms laser spot size
+  Energy: 100
+detector:                    # spectrum calculation
+  pdim:  2                   # number of detector dimensions for spectrum calculation
+  omega: [8.1e9,8.7e9,300]   # [omegamin,omegamax,Nomega] , eV
+  theta: [0,15e-6,110]       # [thetamin,thetamax,Ntheta] , rad
+  phi:   0.0                 # phi
+

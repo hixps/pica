@@ -8,9 +8,9 @@ with open("README.md", "r") as fh:
 # setuptools.setup(
 setup(
     name="luxeics",
-    version="0.2",
+    version="1.1",
     author="Daniel Seipt",
-    author_email="d.seipt@gsi.de",
+    author_email="d.seipt@hi-jena.gsi.de",
     description="ICS simulations for LUXE",
     url          = 'https://github.com/danielseipt/luxeics.git',
     packages     = ['luxeics'] ,

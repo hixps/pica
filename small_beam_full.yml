@@ -25,7 +25,7 @@ beam:
   gamma:        32289.62818003914
   energyspread: 1e-3
   theta:        0.
-  emittance:    1.4       # mm mrad
+  emittance:    1.5       # mm mrad
   sigmaX:       5.        # micron, transverse beam size
   sigmaY:       5.        # micron, transverse beam size
   sigmaL:       20.       # micron, longitduinal beam size

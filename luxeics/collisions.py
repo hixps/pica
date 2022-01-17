@@ -31,6 +31,97 @@ need to determine the covariance from the actual beam parameters
 ############################################
 
 
+def Covariant_Matrix(beam_size,rms_angle,L):
+    cov_at_IP_Focus = np.array([[beam_size**2, 0], [0, rms_angle**2]])
+     
+
+
+    #Inverse of beam transport matrix
+    M = np.array([[1, -L], [0, 1]])
+    #Calculating the Covariant matrix at the Interaction Point
+    cov=(M@cov_at_IP_Focus@M.T)
+    return(cov)
+
+def Gen_electron_Beam(input_filename, sample_electrons):
+    
+    
+    
+    with open( input_filename, 'r' ) as stream:
+        input_dict = yaml.load(stream, Loader=yaml.SafeLoader)
+    
+    
+    
+    
+    
+    
+    # extracting beam parameters from the YML File
+    gamma0       = float( input_dict['beam']['gamma'] )
+    energyspread = float( input_dict['beam']['energyspread'] )
+    emittance    = float( input_dict['beam']['emittance'] )
+    beam_size_X    = float( input_dict['beam']['sigmaX'] )        # transverse beam size x axis in microns
+    beam_size_Y    = float( input_dict['beam']['sigmaY'] )        # transverse beam size y axis in microns
+    beam_length  = float( input_dict['beam']['sigmaL'] )        # longitudinal beam size in microns 
+    beam_charge  = float( input_dict['beam']['beam_charge'])
+    L            = float( input_dict['beam']['L'])
+    
+    
+    
+    
+    
+    
+    # rms angles for x and y space
+    rms_angle_X   = emittance / beam_size_X / gamma0
+    
+    rms_angle_Y   = emittance / beam_size_Y / gamma0
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    #Mean and Covariant matrices for bivariate gaussian
+    
+    mean_x = [0,0]  # x-offset and x' offset for focus 
+    cov_x = Covariant_Matrix(beam_size_X,rms_angle_X,L)
+
+    mean_y = [0,0]  # y-offset and y' offset for focus
+    cov_y = Covariant_Matrix(beam_size_Y,rms_angle_Y,L)
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    #Sampling (x,x') and (y,y')
+    x,theta_x = np.random.multivariate_normal(mean_x, cov_x, sample_electrons).T
+    y,theta_y = np.random.multivariate_normal(mean_y, cov_y, sample_electrons).T
+    
+    
+    
+    gamma        = np.random.normal( gamma0 , gamma0*energyspread , sample_electrons )
+    beta         = sqrt(1-1./gamma**2)
+
+    
+
+
+    
+
+    pz0          = gamma*beta*cos(theta_x)*cos(theta_y)
+    px0          = gamma*beta*sin(theta_x)
+    py0          = gamma*beta*sin(theta_y)
+    pt0          = sqrt( 1 + px0**2 + py0**2 + pz0**2 )
+
+
+    
+    return(x,theta_x,y,theta_y,gamma,pt0,px0,py0,pz0)
 
 def gaussian_sum_normalized( mean , rms , nbeam ):
     """
@@ -210,18 +301,16 @@ def main_program_full( input_filename ):
 
 
 
-    # extract beam parameters
-    gamma0       = float( input_dict['beam']['gamma'] )
-    energyspread = float( input_dict['beam']['energyspread'] )
-    emittance    = float( input_dict['beam']['emittance'] )
-    beam_size    = float( input_dict['beam']['sigmaT'] )        # transverse beam size in microns
+    # extract beam parameters: Parsing of the Beam Parameters has been shifted to the function "Generate_electron_Beam"
+    
+#     gamma0       = float( input_dict['beam']['gamma'] )
+#     energyspread = float( input_dict['beam']['energyspread'] )
+#     emittance    = float( input_dict['beam']['emittance'] )
+#     beam_size_X    = float( input_dict['beam']['sigmaX'] )        # transverse beam size x axis in microns
+#     beam_size_Y    = float( input_dict['beam']['sigmaY'] )        # transverse beam size y axis in microns
     beam_length  = float( input_dict['beam']['sigmaL'] )        # longitudinal beam size in microns 
     beam_charge  = float( input_dict['beam']['beam_charge'])
-
-
-
-    rms_angle   = emittance / beam_size / gamma0
-
+    
 
     # extract detector parameters
     omega_detector = [float(w) for w in input_dict['detector']['omega']]
@@ -256,22 +345,41 @@ def main_program_full( input_filename ):
 
         # print (len(W_photon))
 
-
-        gamma        = np.random.normal( gamma0 , gamma0*energyspread , sample_electrons )
-        beta         = sqrt(1-1./gamma**2)
+        '''
+        Luxeics 1.0
         theta_x      = np.random.normal( 0.     , rms_angle           , sample_electrons )
         theta_y      = np.random.normal( 0.     , rms_angle           , sample_electrons )
 
         x            = np.random.normal( 0 , beam_size    , sample_electrons )      
-        y            = np.random.normal( 0 , beam_size    , sample_electrons )      
-        r            = np.sqrt( x**2 + y**2 )
+        y            = np.random.normal( 0 , beam_size    , sample_electrons )
 
-        xi_peak      = a0 * exp( -r**2/w0**2 )
+        '''
+        
+        
+        
+        
+        
+        '''
+        Following lines have been shifted to the function "Generate_electron_Beam"
+        
+        mean_x = [0,0]  # x-offset and x' offset for focus 
+        cov_x=Covariant_Matrix(beam_size_X,rms_angle_X)
+        
+        mean_y = [0,0]  # y-offset and y' offset for focus
+        cov_y=Covariant_Matrix(beam_size_Y,rms_angle_Y)
+        
+        
+        x,theta_x = np.random.multivariate_normal(mean_x, cov_x, sample_electrons).T
+        y,theta_y = np.random.multivariate_normal(mean_y, cov_y, sample_electrons).T
+        
+        
+        gamma        = np.random.normal( gamma0 , gamma0*energyspread , sample_electrons )
+        beta         = sqrt(1-1./gamma**2)
+              
+        
 
 
-        omega        = np.random.uniform(omega_detector[0], omega_detector[1], sample_electrons) 
-        theta        = np.random.uniform(theta_detector[0], theta_detector[1], sample_electrons) 
-        phi          = np.random.uniform(0,2*pi,sample_electrons)
+        
 
 
         pz0          = gamma*beta*cos(theta_x)*cos(theta_y)
@@ -279,7 +387,22 @@ def main_program_full( input_filename ):
         py0          = gamma*beta*sin(theta_y)
         pt0          = sqrt( 1 + px0**2 + py0**2 + pz0**2 )
 
- 
+        '''
+        
+        
+        #Co-related Phase Space
+        x,theta_x,y,theta_y,gamma,pt0,px0,py0,pz0=Gen_electron_Beam(input_filename,sample_electrons)
+        
+        
+        
+        omega        = np.random.uniform(omega_detector[0], omega_detector[1], sample_electrons) 
+        theta        = np.random.uniform(theta_detector[0], theta_detector[1], sample_electrons) 
+        phi          = np.random.uniform(0,2*pi,sample_electrons)
+        
+        r            = np.sqrt( x**2 + y**2 )
+
+        xi_peak      = a0 * exp( -r**2/w0**2 )
+        
         U_in         = asarray([pt0,px0,py0,pz0])
 
 

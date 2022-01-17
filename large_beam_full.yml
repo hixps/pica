@@ -1,10 +1,10 @@
 ---
 control:
-  mode:           full            # don't change
-  name:           large_beam_full # naming of output files
-  radiation:      KN              # KN==Klein-Nishina cross section ... don't change
-  folder: T_Puslse_Parameter_Run  #Folder to save the Yml and h5 files
-  energyaverage:  False           # True to perform energy integral over energy spread, if False just use mean energy gamma
+  mode:             full            # don't change
+  name:             large_beam_full # naming of output files
+  radiation:        KN              # KN==Klein-Nishina cross section ... don't change
+
+  energyaverage:    False           # True to perform energy integral over energy spread, if False just use mean energy gamma
 
   sampling:         rejection     # rejection or weight
   sample_electrons: 1e8           # total number of electrons to sample
@@ -24,9 +24,9 @@ beam:
   gamma:        32289.62818003914
   energyspread: 1e-3
   theta:        0.
-  emittance:    1.4        # mm mrad
-  sigmaX:       5.        # micron, transverse beam size
-  sigmaY:       5.        # micron, transverse beam size
+  emittance:    1.5        # mm mrad
+  sigmaX:       25.        # micron, transverse beam size
+  sigmaY:       25.        # micron, transverse beam size
   sigmaL:       20.        # micron, longitduinal beam size
   beam_charge:  100e-12    # beam charge in Coulomb
   L:            0          #Focus of electron Beam (0 = ICS, in microns)
@@ -44,6 +44,6 @@ laser:
 detector:                    # spectrum calculation
   pdim:  2                   # number of detector dimensions for spectrum calculation
   omega: [5.0e9,9.2e9,300]   # [omegamin,omegamax,Nomega] , eV
-  theta: [0,15e-6,110]       # [thetamin,thetamax,Ntheta] , rad
+  theta: [0,15e-6,200]       # [thetamin,thetamax,Ntheta] , rad
   phi:   0.0                 # phi
 

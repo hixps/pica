@@ -4,7 +4,6 @@ control:
   name:           small_beam_full # naming of output files
   radiation:      KN              # KN==Klein-Nishina cross section ... don't change
   energyaverage:  False           # True to perform energy integral over energy spread, if False just use mean energy gamma
-  folder: T_Puslse_Parameter_Run  #Folder to save the Yml and h5 files
   sampling:         rejection     # rejection or weight
   sample_electrons: 1e8           # total number of electrons to sample
 
@@ -31,8 +30,8 @@ beam:
   sigmaY:       5.        # micron, transverse beam size
   sigmaL:       20.       # micron, longitduinal beam size
   beam_charge:  100e-12   # beam charge in Coulomb
-  L: 0                     #Focus of electron Beam 
-  baseline: 7.5e6          #Distance between ICS and Stong IP
+  L: 0                     #Focus of electron Beam, 0 = ICS interaction point, in microns
+  baseline: 7.5e6          #Distance between ICS and Stong IP in microns
 
 
 laser:

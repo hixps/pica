@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 setup(
     name="luxeics",
     version="1.1",
-    author="Daniel Seipt",
+    author="Daniel Seipt, Dupish",
     author_email="d.seipt@hi-jena.gsi.de",
     description="ICS simulations for LUXE",
     url          = 'https://github.com/danielseipt/luxeics.git',

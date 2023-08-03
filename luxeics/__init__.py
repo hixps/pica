@@ -1,15 +1,7 @@
-name      = "luxeics"
-version   = "1.1"
-
-
-__name__    = name
-__version__ = version
-
-
+from .__version__ import __version__
 
 
 import numpy as np
-
 
 from .constants import *
 from .radint import *

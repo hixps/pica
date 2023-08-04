@@ -2,11 +2,11 @@ import numpy as np
 from numpy import *
 from scipy import *
 from scipy.integrate import cumtrapz
-from scipy.interpolate import RectBivariateSpline
+#from scipy.interpolate import RectBivariateSpline
 
 
 from .constants import elec_mass,finestruct
-from .radint import *
+from .spectrum import Compton_spectrum_linear,StokesParameters
 from .inout import *
 from .__init__ import __version__
 
@@ -25,6 +25,8 @@ to sample correlated transverse phase space ellipses, (x,px) and (y,py);
 need to determine the covariance from the actual beam parameters
 """
 
+
+S3 = 1
 
 ############################################
 # This is where the real stuff starts ######
@@ -149,7 +151,7 @@ def integrate_spectrum_emittancemacroelectron( a0 , omega0 , sigma , sigma_resca
 
                 spec_weight = w_x*w_y*w_gamma * sigma_rescalefactor
 
-                spectrum += spec_weight * radiation_spectrum_linear( U_in , a0 , omega0 , sigma / sigma_rescalefactor , omega, theta, phi )
+                spectrum += spec_weight * Compton_spectrum_linear( U_in , a0 , omega0 , sigma / sigma_rescalefactor , omega, theta, phi, S3 )
 
     return spectrum
 
@@ -168,7 +170,8 @@ def main_program( input_filename ):
 
     if mode=='full':
         print ('>>> mode == full')
-        X_photon,K_photon,W_photon,X_electron,P_electron,W_electron,xi_peak = main_program_full( input_filename )
+        # X_photon,K_photon,W_photon,X_electron,P_electron,W_electron,xi_peak = main_program_full( input_filename )
+        X_photon,K_photon,W_photon,Stokes_photon,X_electron,P_electron,W_electron,xi_peak = main_program_full( input_filename )
 
     # elif mode=='simple':
     #     print ('>>> mode == simple')
@@ -208,6 +211,10 @@ def main_program( input_filename ):
         fs['photon/momentum'].attrs['unit'] = 'eV'
         fs['photon/weight'  ]               = W_photon
         fs['photon/weight'  ].attrs['unit'] = '1'
+        fs['photon/Stokes'  ]               = Stokes_photon
+        fs['photon/Stokes'  ].attrs['unit'] = '1'
+
+
 
 
         fs['electron/position']               = X_electron
@@ -299,6 +306,7 @@ def main_program_full( input_filename ):
     # extract detector parameters
     omega_detector = [float(w) for w in input_dict['detector']['omega']]
     theta_detector = [float(t) for t in input_dict['detector']['theta']]
+    phi_detector   = [float(p) for p in input_dict['detector']['phi']]
 
 
 
@@ -316,16 +324,20 @@ def main_program_full( input_filename ):
     K_photon       = []
     W_photon       = []
 
+    Stokes_photon  = []
+
     X_electron     = []
     P_electron     = []
     W_electron     = []
+
+
 
 
     print (' >> MC sampling')
 
     for jj,sample_electrons in enumerate(sampling_batches):
 
-        print (f'  > batch {jj} : {sample_electrons} macroelectrons of weight {electron_weight}')
+        print (f'  > batch {jj} : {sample_electrons:.2g} macroelectrons of weight {electron_weight:.5g}')
 
         # print (len(W_photon))
 
@@ -339,15 +351,15 @@ def main_program_full( input_filename ):
 
         
         # photon detector
-        omega        = np.random.uniform(omega_detector[0], omega_detector[1], sample_electrons) 
-        theta        = np.random.uniform(theta_detector[0], theta_detector[1], sample_electrons) 
-        phi          = np.random.uniform(0,2*pi,sample_electrons)
+        omega        = np.random.uniform(omega_detector[0],     omega_detector[1],     sample_electrons) 
+        theta        = np.random.uniform(theta_detector[0],     theta_detector[1],     sample_electrons) 
+        phi          = np.random.uniform(phi_detector[0]*np.pi, phi_detector[1]*np.pi, sample_electrons)
         
         spec_weight  =  sigma_rescalefactor
 
 
         # print (gamma.shape,theta_x.shape,U_in.shape,)
-        rad_int  = radiation_spectrum_linear( U_in , xi_peak , omega0 , sigma / sigma_rescalefactor , omega, theta, phi )
+        rad_int  = Compton_spectrum_linear( U_in , xi_peak , omega0 , sigma / sigma_rescalefactor , omega, theta, phi, S3 )
 
         spectrum = spec_weight * rad_int * sin(theta)
 
@@ -375,7 +387,6 @@ def main_program_full( input_filename ):
         keep_omega   = omega[selector1]
         keep_theta   = theta[selector1]
         keep_phi     = phi[selector1]
-
 
 
 
@@ -414,11 +425,21 @@ def main_program_full( input_filename ):
 
         print ('   total photon number:',len(W_electron))
 
+        # Stokes Parameters of emitted Photons
+        U_in_keep  = asarray([pt0[selector1],px0[selector1],py0[selector1],pz0[selector1]])
+        S1_new, S2_new, S3_new = StokesParameters( U_in_keep , a0 , omega0 , sigma , keep_omega, keep_theta, keep_phi , S3 )
+        # print (S1_new,S2_new,S3_new)
+
+
+        Stokes_photon.extend( np.asarray([S1_new,S2_new,S3_new]).T )
+
+
 
     # convert lists into ndarrays
     X_photon     = np.asarray(X_photon)
     K_photon     = np.asarray(K_photon)
     W_photon     = np.asarray(W_photon)
+    Stokes_photon= np.asarray(Stokes_photon)
     keep_xi_peak = np.asarray(keep_xi_peak)
 
     X_electron   = np.asarray(X_electron)
@@ -426,7 +447,10 @@ def main_program_full( input_filename ):
     W_electron   = np.asarray(W_electron)
 
 
-    return X_photon,K_photon,W_photon,X_electron,P_electron,W_electron,keep_xi_peak
+
+
+
+    return X_photon,K_photon,W_photon,Stokes_photon,X_electron,P_electron,W_electron,keep_xi_peak
 
 
 

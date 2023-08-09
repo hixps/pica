@@ -59,8 +59,8 @@ def Compton_spectrum_linear( U_in , a0 , omega0 , sigma , omega, theta, phi , S3
     s            = omega/energy_in   # fractional energy loss
 
 
-    print (s)
-    print ((U_in[0] + U_in[3])/(omega*(1+np.cos(theta))))
+    # print (s)
+    # print ((U_in[0] + U_in[3])/(omega*(1+np.cos(theta))))
 
     # direction of the outgoing photon
     nx = np.sin(theta)*np.cos(phi)
@@ -87,11 +87,11 @@ def Compton_spectrum_linear( U_in , a0 , omega0 , sigma , omega, theta, phi , S3
     x          = 2 * L * omega0 * ( U_in[0] + U_in[3]) / elec_mass
 
 
-    print (L)
-    print (x)
-    print (y)
-    print (x/y+y/x)
-    print ('----------')
+    # print (L)
+    # print (x)
+    # print (y)
+    # print (x/y+y/x)
+    # print ('----------')
 
     #X           = kap_in/kap_out + kap_out/kap_in + 2*(1/kap_in-1/kap_out) + (1/kap_in-1/kap_out)**2
     # -->  this needs to be modified for linear laser polarization!!!!
@@ -105,7 +105,7 @@ def Compton_spectrum_linear( U_in , a0 , omega0 , sigma , omega, theta, phi , S3
 
     F           = F0_building_block(x,y) + xi3 * F3_building_block(x,y)
 
-    print (all(F>0))
+    # print (all(F>0))
 
     prefactor   = finestruct * a0**2 * omega / (32*np.pi**2) / elec_mass**2 / b0**2 / (1-s)
 
@@ -130,7 +130,7 @@ def StokesParameters( U_in , a0 , omega0 , sigma , omega, theta, phi , S3 , a0_f
     # quantum energy paramter == laser frequency in electron rest frame in units of electron rest mass
     b0          =     omega0 * ( U_in[0] + U_in[3]) / elec_mass
 
-    print (b0)
+    # print (b0)
 
     # LL y-parameter (86-15), == 2* outgoing kappa-factor of Jauch-Rohrlich (up to mass)
     # y = (m^2-u)/m^2 = 2 K_out*U_in / m 
@@ -145,12 +145,12 @@ def StokesParameters( U_in , a0 , omega0 , sigma , omega, theta, phi , S3 , a0_f
     # x          = 2 * L * omega0 * ( U_in[0] + U_in[3]) / elec_mass
     x          = 2 * omega0 * ( U_in[0] + U_in[3]) / elec_mass
 
-    print ('vvvvvvvvvv')
-    print (np.amin(L),np.amax(L))
-    print (x)
-    print (y)
-    print (x/y+y/x)
-    print ('^^^^^^^^^^')
+    # print ('vvvvvvvvvv')
+    # print (np.amin(L),np.amax(L))
+    # print (x)
+    # print (y)
+    # print (x/y+y/x)
+    # print ('^^^^^^^^^^')
 
 
     #X           = kap_in/kap_out + kap_out/kap_in + 2*(1/kap_in-1/kap_out) + (1/kap_in-1/kap_out)**2

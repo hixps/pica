@@ -5,7 +5,7 @@ control:
   radiation:      KN              # KN==Klein-Nishina cross section ... don't change
   energyaverage:  False           # True to perform energy integral over energy spread, if False just use mean energy gamma
   sampling:         rejection     # rejection or weight
-  sample_electrons: 1e8           # total number of electrons to sample
+  sample_electrons: 2e8           # total number of electrons to sample
 
 
 
@@ -38,14 +38,14 @@ laser:
   a0:     0.1                 # normalized laser vector potential
   omega0: 4.1                 # eV, laser frequency 
   Tpulse: 100.0               # fs, FWHM laser pulse duration
-  pol:    0.7853981633974483  # polarization parameter, CP
+  pol:    0                   # polarization parameter, LP
   pulse:  cos2                # pulse envelope function, only cos2 supported so far
   w0:     25.                 # micron, rms laser spot size
   # w0:     5.                 # micron, rms laser spot size
 
 detector:                    # spectrum calculation
   pdim:  2                   # number of detector dimensions for spectrum calculation
-  omega: [5.0e9,9.2e9,300]   # [omegamin,omegamax,Nomega] , eV
-  theta: [0,15e-6,110]       # [thetamin,thetamax,Ntheta] , rad
-  phi:   0.0                 # phi
+  omega: [5.0e9,9.2e9]   # [omegamin,omegamax,Nomega] , eV
+  theta: [0,15e-6]       # [thetamin,thetamax,Ntheta] , rad
+  phi:   [0.0,2]                 # phi
 

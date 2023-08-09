@@ -1,21 +1,16 @@
 import numpy as np
 
-
-# from numpy import *
-# from scipy import *
 from scipy.integrate import cumtrapz
-#from scipy.interpolate import RectBivariateSpline
 
 
 from .constants import elec_mass,finestruct
 from .spectrum import Compton_spectrum_linear,StokesParameters
-# from .inout import *
 from .__init__ import __version__
 
 from .auxiliary import beam_covariance_matrix, gaussian_sum_normalized
 
 import yaml
-
+import h5py
 
 
 """

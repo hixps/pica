@@ -7,15 +7,41 @@ Input files in ```yaml``` format
 
 Output files in PTARMIGAN-hdf5 format: https://github.com/tgblackburn/ptarmigan
 
+## Dependencies
+
+* python >= 3.7
+* numpy
+* scipy
+* h5py
+* yaml
+
 ## Installation
+
+```python
+python -m build;
+pip install dist/luxeics-<version number>.tar.gz 
+```
+
+or
 
 ```python
 python setup.py install
 ```
 
+
 ## Useage
 
 ```python
 import luxeics
-luxeics.main_program( input_filename='config.yml' )
+
+SIM =  luxeics.ICSSimulation( input_filename='input_file' )
+SIM.run()
 ```
+
+
+## Changelog
+
+* v1.2.0 
+	* linear laser polarization and linear Stokes parameters of gamma rays
+	
+	

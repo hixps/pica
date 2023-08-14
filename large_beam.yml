@@ -3,24 +3,22 @@ control:
   sampling:         rejection       # only rejection sampling is implemented currently
   xsection:         Greiner
   beam:
-    sample_electrons:  1e8          # total number of electrons to sample
-    sample_batch_size: 1e7          # 
+    sample_electrons:  1e8         # total number of macroelectrons electrons to sample
+    sample_batch_size: 1e7         # number of macroelectrons per batch
 
   # rescaling of pulse duration
   laser:
     sigma_rescale: False
-    sigma_crit:    500.
-
-
+    sigma_crit:    50.
 
 
 beam:
   gamma:        32289.62818003914
   energyspread: 1e-3
-  emittanceX:   0.0       # mm mrad
-  emittanceY:   0.0       # mm mrad
-  sigmaX:       5.        # micron, transverse beam size
-  sigmaY:       5.        # micron, transverse beam size
+  emittanceX:   1.5       # mm mrad
+  emittanceY:   1.5       # mm mrad
+  sigmaX:       25.       # micron, transverse beam size
+  sigmaY:       25.       # micron, transverse beam size
   sigmaL:       20.       # micron, longitduinal beam size
   beam_charge:  100e-12   # beam charge in Coulomb
   beam_focus_z: 0         # Focus position of electron beam, 0 = ICS interaction point, in microns
@@ -31,11 +29,13 @@ laser:
   a0:     0.1                 # normalized laser vector potential
   omega0: 4.1                 # eV, laser frequency 
   Tpulse: 100.0               # fs, FWHM laser pulse duration
-  pol:    0.                  # polarization parameter, LP
+  pol:    0                   # polarization parameter, LP
   pulse:  cos2                # pulse envelope function, only cos2 supported so far
   w0:     25.                 # micron, rms laser spot size
   S3:     1.                  # laser Stokes parameter
   # w0:     5.                 # micron, rms laser spot size
+
+
 
 detector:                           # spectrum calculation
   pdim:  3                          # number of detector dimensions for spectrum calculation

@@ -3,6 +3,7 @@ import numpy as np
 from .__init__ import __version__
 
 
+
 """
 Routines for input/output
 
@@ -15,7 +16,6 @@ final-state
     spectrum
 
 
-
 """
 
 class ParameterReader():
@@ -25,35 +25,20 @@ class ParameterReader():
 
     def read_laser_parameters(self):
 
-        sigma_rescale           = bool(self.input_dict['control']['laser']['sigma_rescale'])
+        self.sigma_rescale           = bool(self.input_dict['control']['laser']['sigma_rescale'])
 
 
-        self.omega0 = float( self.input_dict['laser']['omega0']  )
-        self.a0     = float( self.input_dict['laser']['a0']      )
-        self.Tpulse = float( self.input_dict['laser']['Tpulse']  )
-        self.w0     = float( self.input_dict['laser']['w0']      )
-        # self.S3     = float( self.input_dict['laser']['S3']      )
-        self.pulse  = self.input_dict['laser']['pulse']
-        self.poldegree    = float( self.input_dict['laser']['poldegree']     )
-        self.polangle     = float( self.input_dict['laser']['polangle']     )
+        self.omega0    = float( self.input_dict['laser']['omega0']  )
+        self.a0        = float( self.input_dict['laser']['a0']      )
+        self.Tpulse    = float( self.input_dict['laser']['Tpulse']  )
+        self.w0        = float( self.input_dict['laser']['w0']      )
+        self.poldegree = float( self.input_dict['laser']['poldegree']     )
+        self.polangle  = float( self.input_dict['laser']['polangle']     )
+        self.pulse     = self.input_dict['laser']['pulse']
 
         if self.pulse!='cos2':
             raise NotImplementedError
 
-        # translate Tpulse==FWHM in fs --> sigma parameter which is dimensionless
-        self.sigma = 2.0852201339 * self.Tpulse * self.omega0
-        # the numerical factor is 0.5*pi/arccos(1/2**(1/4)) * 1.52, where the factor 1.52 comes from the transition from eV to fs
-
-        if sigma_rescale:
-            sigma_crit =  float( input_dict['control']['laser']['sigma_crit']  )
-            if sigma > sigma_crit:
-                self.sigma_rescalefactor = sigma / sigma_crit
-                print (f' >> rescale pulse duration: {sigma:.2f} -> {sigma_crit:.2f}: sigma_rescalefactor = {sigma_rescalefactor:.2f}')
-            else:
-                self.sigma_rescalefactor = 1.
-        else:
-            sigma_crit               = 0
-            self.sigma_rescalefactor = 1.
 
 
     def read_beam_parameters(self):

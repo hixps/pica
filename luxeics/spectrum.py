@@ -11,7 +11,7 @@ def laser_spectum(L,sigma):
     # the Fourier transform of the laser envelope, replaces the delta-function in the usual cross section
 
     # specify spectrum for cos^2 pulse
-    laser_spec  = np.pi**4 * np.sin( (L-1) * sigma )**2 / ( (L-1)*np.pi**2 - (L-1)**3*sigma**2)**2
+    laser_spec  = np.pi**4 * np.sin( (L-1) * sigma )**2 / ( (L-1)*np.pi**2 - (L-1)**3*sigma**2 )**2
 
     return laser_spec
 
@@ -22,14 +22,14 @@ def L_parameter_linear(y,s,b0):
     use energy momentum conservation and that 
         1) in linear Compton scattering: y = 2b0*L(1-s)
     """
-    print ('no a0 correction')
+    # print ('no a0 correction')
     _L           = 0.5*y / b0/(1-s)
     return _L
 
 
 def L_parameter_a0correction(y,s,b0,a0):
     # approximately take into account the intensity-dependent red-shift 
-    print ('a0 correction active')
+    # print ('a0 correction active')
     _L           = 0.5* (y + s*a0**2/2.*b0) / b0/(1-s)
     return _L
 
@@ -98,6 +98,11 @@ class Compton_Spectrum():
 
     @property
     def prefactor(self):
+        self._prefactor   = finestruct * self.a0**2 * self.omega / (4*np.pi**2) / elec_mass**2 / self.b0**2 / (1-self.s)
+        return self._prefactor
+
+    @property
+    def prefactor2(self):
         self._prefactor   = finestruct * self.a0**2 * self.omega / (4*np.pi**2) / elec_mass**2 / self.b0**2 / (1-self.s)
         return self._prefactor
 

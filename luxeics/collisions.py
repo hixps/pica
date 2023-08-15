@@ -1,20 +1,15 @@
 import numpy as np
+import yaml
+import h5py
 
 from scipy.integrate import cumtrapz
 
-
-from .constants import elec_mass,finestruct
-from .spectrum import Compton_Spectrum_Greiner, Compton_Spectrum_Landau, Compton_Spectrum_Full
-
-from .__init__ import __version__
-
+from .constants import hbarc,c, elec_mass,finestruct, joule_per_eV
+from .spectrum  import Compton_Spectrum_Greiner, Compton_Spectrum_Landau, Compton_Spectrum_Full
+from .__init__  import __version__
 from .auxiliary import beam_covariance_matrix, gaussian_sum_normalized
+from .inout     import H5Writer, ParameterReader
 
-
-from .inout import H5Writer, ParameterReader
-
-import yaml
-import h5py
 
 
 """
@@ -45,6 +40,27 @@ class ICSSimulation(H5Writer, ParameterReader):
 
         self.read_laser_parameters()
         self.read_beam_parameters()
+
+        # translate Tpulse==FWHM in fs --> sigma parameter which is dimensionless, specific for cos^2 envelope
+        self.sigma = 0.25*np.pi/np.arccos(1/2**0.25)*c/hbarc * self.Tpulse * self.omega0
+        # print (0.25*np.pi/np.arccos(1/2**0.25)*c/hbarc , 2.0852201339)
+        # self.sigma = 2.0852201339 * self.Tpulse * self.omega0
+        # the numerical factor is 0.25*pi/arccos(1/2**(1/4)) * 1.52, where the factor 1.52 comes from the transition from eV to fs
+
+
+        self.total_energy    = 3/32 * self.omega0**2 * self.a0**2 * elec_mass**2 / finestruct * self.w0**2 * self.sigma
+        self.total_energy_J  = self.total_energy * joule_per_eV
+
+        if self.sigma_rescale:
+            self.sigma_crit =  float( self.input_dict['control']['laser']['sigma_crit']  )
+            if self.sigma > self.sigma_crit:
+                self.sigma_rescalefactor = self.sigma / self.sigma_crit
+                print (f' >> rescale pulse duration: {self.sigma:.2f} -> {self.sigma_crit:.2f}: sigma_rescalefactor = {self.sigma_rescalefactor:.2f}')
+            else:
+                self.sigma_rescalefactor = 1.
+        else:
+            # self.sigma_crit          = 0
+            self.sigma_rescalefactor = 1.
 
 
         # initialize ouput arrays
@@ -81,13 +97,13 @@ class ICSSimulation(H5Writer, ParameterReader):
         self.sample_electrons_total  = int(float( self.input_dict['control']['beam']['sample_electrons'] ))
 
         try:
-            self.sample_batch_size       = int(float(self.input_dict['control']['beam']['sample_batch_size']))
+            self.sample_batch_size   = int(float(self.input_dict['control']['beam']['sample_batch_size']))
         except KeyError:
-            self.sample_batch_size       = int(1e7)
+            self.sample_batch_size   = int(1e7)
             print (f'"control/sample_batch_size" not specified, set to default value {self.sample_batch_size:.1g}')
 
 
-        beam_charge  = float( self.input_dict['beam']['beam_charge'])
+        # beam_charge  = float( self.input_dict['beam']['beam_charge'])
 
 
 
@@ -101,7 +117,7 @@ class ICSSimulation(H5Writer, ParameterReader):
 
         print (f'n_batches={n_samp}, remainder={r_samp}, number_of_particles={sum(self.sampling_batches):.4g}={self.sample_electrons_total:.4g}')
 
-        number_electrons = int( beam_charge / 1.60217653e-19)
+        number_electrons = int( self.beam_charge / 1.60217653e-19)
 
         # sample_electrons = int(5e7) # number of elecrons used for MC sampling, determines weight of each emitted photon
         self.electron_weight  = number_electrons / self.sample_electrons_total
@@ -199,8 +215,10 @@ class ICSSimulation(H5Writer, ParameterReader):
         s_val        = np.random.uniform(0             , spec_max,       number_sample_electrons)
 
 
-        samplingvolume     = spec_max * (self.omega_detector[1]-self.omega_detector[0]) * (self.theta_detector[1]-self.theta_detector[0])
-        base_photon_weight = 2*np.pi * samplingvolume * self.electron_weight
+        samplingvolume     = spec_max * (self.omega_detector[1]-self.omega_detector[0]) \
+                                      * (self.theta_detector[1]-self.theta_detector[0]) \
+                                      * (self.phi_detector[1]  -self.phi_detector[0])
+        base_photon_weight = samplingvolume * self.electron_weight
 
         # selector1 are the particles that have been successfully sampled
         selector1          = s_val < spectrum

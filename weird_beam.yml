@@ -8,19 +8,19 @@ control:
 
   # rescaling of pulse duration
   laser:
-    sigma_rescale: False
-    sigma_crit:    50.
+    sigma_rescale: True
+    sigma_crit:    200.
   detector:
-    a0_freq_correction: True       # include a0-dependent frequency red-shift 
+    a0_freq_correction: False       # include a0-dependent frequency red-shift 
 
 
 beam:
   gamma:        32289.62818003914
   energyspread: 1e-3
-  emittanceX:   1.5       # mm mrad
-  emittanceY:   1.5       # mm mrad
-  sigmaX:       25.        # micron, transverse beam size
-  sigmaY:       25.        # micron, transverse beam size
+  emittanceX:   0.2       # mm mrad
+  emittanceY:   0.2       # mm mrad
+  sigmaX:       5.        # micron, transverse beam size
+  sigmaY:       5.        # micron, transverse beam size
   sigmaL:       20.       # micron, longitduinal beam size
   beam_charge:  100e-12   # beam charge in Coulomb
   beam_focus_z: 0         # Focus position of electron beam, 0 = ICS interaction point, in microns
@@ -41,5 +41,5 @@ detector:                           # spectrum calculation
   pdim:  3                          # number of detector dimensions for spectrum calculation
   omega: [5.0e9,9.2e9]              # [omegamin,omegamax] , eV
   theta: [0,15e-6]                  # [thetamin,thetamax] , rad
-  phi:   [0.0,6.283185307179586]    # [phimin,phimax]     , rad
+  phi:   [1.0,3.3]                   # [phimin,phimax]     , rad
 

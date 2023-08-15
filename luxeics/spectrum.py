@@ -1,6 +1,4 @@
 import numpy as np
-# from numpy import *
-# from scipy import *
 
 from .constants import elec_mass,finestruct
 
@@ -24,21 +22,22 @@ def L_parameter_linear(y,s,b0):
     use energy momentum conservation and that 
         1) in linear Compton scattering: y = 2b0*L(1-s)
     """
-    L           = 0.5*y / b0/(1-s)
-    return L
+    print ('no a0 correction')
+    _L           = 0.5*y / b0/(1-s)
+    return _L
 
 
 def L_parameter_a0correction(y,s,b0,a0):
-    
     # approximately take into account the intensity-dependent red-shift 
-    L           = 0.5* (y + s*a0**2/2.*b0) / b0/(1-s)
-    return L
+    print ('a0 correction active')
+    _L           = 0.5* (y + s*a0**2/2.*b0) / b0/(1-s)
+    return _L
 
 
 
 class Compton_Spectrum():
 
-    def __init__(self, U_in , a0 , omega0 , sigma , omega, theta, phi , S3 , a0_freq_correction=False ):
+    def __init__(self, U_in , a0 , omega0 , sigma , omega, theta, phi , laser_poldegree , laser_polangle , a0_freq_correction ):
 
         self.U_in = U_in
         self.a0   = a0
@@ -49,7 +48,10 @@ class Compton_Spectrum():
         self.theta  = theta
         self.phi    = phi
 
-        self.S3     = S3
+        
+        self.laser_poldegree   = laser_poldegree
+        self.laser_polangle    = laser_polangle
+
 
         self.a0_freq_correction = a0_freq_correction
 
@@ -67,19 +69,6 @@ class Compton_Spectrum():
         # quantum energy paramter == laser frequency in electron rest frame in units of electron rest mass
         self.b0           =     omega0 * ( U_in[0] + U_in[3]) / elec_mass
 
-        # print (self.s)
-        # print (self.s2)
-
-
-
-    @property
-    def xi1(self):
-        return self.S3 * np.sin(2*self.phi)
-
-    @property
-    def xi3(self):
-        # polarization degree with regard to scattering plane
-        return self.S3 * np.cos(2*self.phi)
 
 
     @property
@@ -112,27 +101,139 @@ class Compton_Spectrum():
         self._prefactor   = finestruct * self.a0**2 * self.omega / (4*np.pi**2) / elec_mass**2 / self.b0**2 / (1-self.s)
         return self._prefactor
 
-    def F0_building_block(self,x,y):
-        return 0.25*(x/y + y/x) + (1./x - 1./y) + (1./x-1./y)**2
 
-    def F3_building_block(self,x,y):
-        return - (1./x - 1./y) - (1./x-1./y)**2
 
-    def F11_building_block(self,x,y):
-        return 1./x-1./y + 0.5
 
-    def F22_building_block(self,x,y):
-        return 0.25*(x/y+y/x)*(1+2/x-2/y)
+class Compton_Spectrum_Full(Compton_Spectrum):
 
-    def F33_building_block(self,x,y):
-        return (1/x-1/y)**2 + (1/x-1/y) + 0.5
+    def __init__(self, *args, **kwargs):
+        Compton_Spectrum.__init__(self, *args, **kwargs)
 
+    @property
+    def Ein(self):
+        # incident polarization vector
+        Ein_0 = 0
+        Ein_1 = self.laser_poldegree * np.cos(self.laser_polangle)
+        Ein_2 = self.laser_poldegree * np.sin(self.laser_polangle)
+        Ein_3 = 0
+        return (Ein_0, Ein_1, Ein_2, Ein_3)
+
+    @property
+    def Eout_1(self):
+        # outgoing polarization vector 1
+        E1_0   = 0
+        E1_1   = np.cos(self.theta) * np.cos(self.phi)
+        E1_2   = np.cos(self.theta) * np.sin(self.phi)
+        E1_3   = -np.sin(self.theta) 
+        return (E1_0, E1_1, E1_2, E1_3)
+
+    @property
+    def Eout_2(self):
+        # outgoing polarization vector 2
+        E2_0   = 0
+        E2_1   = -np.sin(self.phi)
+        E2_2   = np.cos(self.phi)
+        E2_3   = 0  
+        return (E2_0,E2_1,E2_2,E2_3)  
+
+    @property
+    def U_out(self):
+        # outgoing normalized momentum
+        U_out_0 = self.U_in[0] + ( self.L*self.omega0 - self.omega        )/elec_mass
+        U_out_1 = self.U_in[1] + (                    - self.omega*self.nx)/elec_mass
+        U_out_2 = self.U_in[2] + (                    - self.omega*self.ny)/elec_mass
+        U_out_3 = self.U_in[3] + (-self.L*self.omega0 - self.omega*self.nz)/elec_mass
+        return (U_out_0,U_out_1,U_out_2,U_out_3)
+    
+
+
+    def dot4(self, X, Y ):
+        return X[0]*Y[0] - X[1]*Y[1] - X[2]*Y[2] - X[3]*Y[3]
+
+
+    def cross_section(self):
+
+        # Epsilon_pi = - self.U_in[1]
+        # Epsilon_pf = - self.U_in[1] + self.omega/elec_mass * self.nx
+        # Polarizationbracket = 2*(Epsilon_pi)/self.x - 2*Epsilon_pf/self.y
+
+        # F           = 0.25*(self.x/self.y+self.y/self.x) - 0.5 * Polarizationbracket**2
+
+
+        # now all the scalar products
+        Ein_E1   = self.dot4( self.Ein, self.Eout_1)
+        Ein_E2   = self.dot4( self.Ein, self.Eout_2)
+
+        Ein_Uin  = self.dot4( self.Ein, self.U_in )
+        Ein_Uout = self.dot4( self.Ein, self.U_out )
+
+        E1_Uin   = self.dot4( self.Eout_1, self.U_in )
+        E1_Uout  = self.dot4( self.Eout_1, self.U_out )
+
+        E2_Uin   = self.dot4( self.Eout_2, self.U_in )
+        E2_Uout  = self.dot4( self.Eout_2, self.U_out )
+
+
+        M0       = 0.5*(self.x/self.y+self.y/self.x) - 1
+        M1       = Ein_E1 - 2*Ein_Uin*E1_Uout/self.x + 2*Ein_Uout*E1_Uin/self.y
+        M2       = Ein_E2 - 2*Ein_Uin*E2_Uout/self.x + 2*Ein_Uout*E2_Uin/self.y
+
+        F          = 0.5*(M0 +  M1*M1 + M2*M2)
+
+        # print ( F  )
+        # print ( F2 )
+
+        # prefactor   = finestruct * self.a0**2 * self.omega / (4*np.pi**2) / elec_mass**2 / self.b0**2 / (1-self.s)
+        laser_spec  = laser_spectum(self.L,self.sigma)
+        return self.prefactor * laser_spec * F
+
+
+    def StokesParameters( self ):
+
+
+        # now all the scalar products
+        # now all the scalar products
+        Ein_E1   = self.dot4( self.Ein, self.Eout_1)
+        Ein_E2   = self.dot4( self.Ein, self.Eout_2)
+
+        Ein_Uin  = self.dot4( self.Ein, self.U_in )
+        Ein_Uout = self.dot4( self.Ein, self.U_out )
+
+        E1_Uin   = self.dot4( self.Eout_1, self.U_in )
+        E1_Uout  = self.dot4( self.Eout_1, self.U_out )
+
+        E2_Uin   = self.dot4( self.Eout_2, self.U_in )
+        E2_Uout  = self.dot4( self.Eout_2, self.U_out )
+
+
+        M0       = 0.5*(self.x/self.y+self.y/self.x) - 1
+        M1       = Ein_E1 - 2*Ein_Uin*E1_Uout/self.x + 2*Ein_Uout*E1_Uin/self.y
+        M2       = Ein_E2 - 2*Ein_Uin*E2_Uout/self.x + 2*Ein_Uout*E2_Uin/self.y
+
+
+        rho_11 = M0 + 2 * M1*M1
+        rho_12 =      2 * M1*M2
+        rho_22 = M0 + 2 * M2*M2
+
+
+        Stokes1     = 2*rho_12/(rho_11+rho_22)
+        Stokes2     = 0*Stokes1 # circular polarization degree, not supported yet
+        Stokes3     = (rho_11-rho_22)/(rho_11+rho_22)
+
+        # print (E1_Uin.shape,M0.shape,M1.shape,rho_11.shape,Stokes1.shape)
+        # print (Stokes1,Stokes2,Stokes3)
+
+        return Stokes1,Stokes2,Stokes3
 
 
 class Compton_Spectrum_Landau(Compton_Spectrum):
 
     def __init__(self, *args, **kwargs):
         Compton_Spectrum.__init__(self, *args, **kwargs)
+
+        # only x-polarization should be somewhat ok ... others need to be checked
+        self.S1 =   self.laser_poldegree * np.sin(2*self.laser_polangle)
+        self.S3 = - self.laser_poldegree * np.cos(2*self.laser_polangle)
 
     def cross_section(self):
 
@@ -152,6 +253,32 @@ class Compton_Spectrum_Landau(Compton_Spectrum):
         Stokes3     = (self.F3_building_block(self.x,self.y) + self.xi3*self.F33_building_block(self.x,self.y)) / F 
 
         return Stokes1,Stokes2,Stokes3
+
+    @property
+    def xi1(self):
+        return self.S3 * np.sin(2*self.phi)
+
+    @property
+    def xi3(self):
+        # polarization degree with regard to scattering plane
+        return self.S3 * np.cos(2*self.phi)
+
+
+    def F0_building_block(self,x,y):
+        return 0.25*(x/y + y/x) + (1./x - 1./y) + (1./x-1./y)**2
+
+    def F3_building_block(self,x,y):
+        return - (1./x - 1./y) - (1./x-1./y)**2
+
+    def F11_building_block(self,x,y):
+        return 1./x-1./y + 0.5
+
+    def F22_building_block(self,x,y):
+        return 0.25*(x/y+y/x)*(1+2/x-2/y)
+
+    def F33_building_block(self,x,y):
+        return (1/x-1/y)**2 + (1/x-1/y) + 0.5
+
 
 
 

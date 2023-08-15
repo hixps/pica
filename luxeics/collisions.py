@@ -4,8 +4,7 @@ from scipy.integrate import cumtrapz
 
 
 from .constants import elec_mass,finestruct
-# from .spectrum import Compton_spectrum_linear_LL,Compton_spectrum_linear_Greiner,StokesParameters
-from .spectrum import Compton_Spectrum_Greiner,Compton_Spectrum_Landau
+from .spectrum import Compton_Spectrum_Greiner, Compton_Spectrum_Landau, Compton_Spectrum_Full
 
 from .__init__ import __version__
 
@@ -40,6 +39,8 @@ class ICSSimulation(H5Writer, ParameterReader):
             self.Compton_Spectrum = Compton_Spectrum_Landau
         elif self.xsection=='Greiner':
             self.Compton_Spectrum = Compton_Spectrum_Greiner
+        elif self.xsection=='Full':
+            self.Compton_Spectrum = Compton_Spectrum_Full
 
 
         self.read_laser_parameters()
@@ -57,6 +58,8 @@ class ICSSimulation(H5Writer, ParameterReader):
         self.X_electron     = []
         self.P_electron     = []
         self.W_electron     = []
+
+        self.a0_freq_correction = bool(self.input_dict['control']['detector']['a0_freq_correction'])
 
 
     def run(self):
@@ -182,16 +185,13 @@ class ICSSimulation(H5Writer, ParameterReader):
         spec_weight  =  self.sigma_rescalefactor
 
 
-        Spectrum_object = self.Compton_Spectrum( U_in , xi_peak , self.omega0 , self.sigma / self.sigma_rescalefactor , omega, theta, phi, self.S3 )
+        Spectrum_object = self.Compton_Spectrum( U_in , xi_peak , self.omega0 , self.sigma / self.sigma_rescalefactor , 
+                                                    omega, theta, phi, 
+                                                    self.poldegree, self.polangle, self.a0_freq_correction )
         rad_int         = Spectrum_object.cross_section()
 
-        # if self.xsection=='Landau':
-        #     rad_int  = Compton_spectrum_linear_LL( U_in , xi_peak , self.omega0 , self.sigma / self.sigma_rescalefactor , omega, theta, phi, self.S3 )
-        # elif self.xsection=='Greiner':
-        #     rad_int  = Compton_spectrum_linear_Greiner( U_in , xi_peak , self.omega0 , self.sigma / self.sigma_rescalefactor , omega, theta, phi, self.S3 )
 
         spectrum = spec_weight * rad_int * np.sin(theta)
-
         spec_max = np.amax(spectrum)
 
 
@@ -226,6 +226,7 @@ class ICSSimulation(H5Writer, ParameterReader):
         sampled_t       = -0.5 * sampled_zeta
 
 
+        sampled_xi_peak = xi_peak[selector1]
 
 
         K0           = sampled_omega
@@ -241,11 +242,13 @@ class ICSSimulation(H5Writer, ParameterReader):
         pt_out  = np.sqrt( elec_mass**2 + px_out**2 + py_out**2 + pz_out**2 )
 
 
-        # Stokes Parameters of emitted Photons
+        # Calculation of Stokes Parameters of emitted Photons
         sampled_U_in  = np.asarray([pt0[selector1],px0[selector1],py0[selector1],pz0[selector1]])
 
-        sampled_Spectrum_oject = self.Compton_Spectrum( sampled_U_in , self.a0 , self.omega0 , self.sigma , sampled_omega, sampled_theta, sampled_phi , self.S3 )
-        S1_new, S2_new, S3_new = sampled_Spectrum_oject.StokesParameters()
+        sampled_Spectrum_object = self.Compton_Spectrum( sampled_U_in , sampled_xi_peak , self.omega0 , self.sigma / self.sigma_rescalefactor , 
+                                                    sampled_omega, sampled_theta, sampled_phi, 
+                                                    self.poldegree, self.polangle, self.a0_freq_correction )
+        S1_new, S2_new, S3_new  = sampled_Spectrum_object.StokesParameters()
 
         # S1_new, S2_new, S3_new = StokesParameters( sampled_U_in , self.a0 , self.omega0 , self.sigma , sampled_omega, sampled_theta, sampled_phi , self.S3 )
 
@@ -253,7 +256,7 @@ class ICSSimulation(H5Writer, ParameterReader):
 
         # store the sampled photons in the corresponding lists of the class instance
 
-        self.xi_peak.extend(       xi_peak[selector1])
+        self.xi_peak.extend(       sampled_xi_peak )
 
         self.X_photon.extend(      np.asarray( (sampled_t,sampled_x,sampled_y,sampled_z) ).T)
         self.K_photon.extend(      np.asarray( (K0,K1,K2,K3) ).T                )

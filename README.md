@@ -9,11 +9,11 @@ Output files in PTARMIGAN-hdf5 format: https://github.com/tgblackburn/ptarmigan
 
 ## Dependencies
 
-* python >= 3.9
-* numpy
-* scipy
-* h5py
-* pyyaml
+* `python >= 3.9`
+* `numpy`
+* `scipy`
+* `h5py`
+* `pyyaml`
 
 ## Installation
 
@@ -44,7 +44,7 @@ SIM.run()
 * v1.2.0 
 	* linear laser polarization and linear Stokes parameters of gamma rays
 * v1.2.1
-	* laser polarization control via polarization degree and polarization angle (only LP)
+	* laser polarization control via polarization angle (only LP, 100% polarization degree)
 	* "Full" polarized cross section based on Jauch-Rohrlich expression with explicit polarization vectors
 	* Analysis routines for rotating Stokes vectors from scattering plane to laboratory frame	
 	

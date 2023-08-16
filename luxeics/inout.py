@@ -52,6 +52,15 @@ class ParameterReader():
         self.beam_length  = float( self.input_dict['beam']['sigmaL'] )        # longitudinal beam size in microns 
         self.beam_charge  = float( self.input_dict['beam']['beam_charge'])
         self.beam_focus_z = float( self.input_dict['beam']['beam_focus_z'])
+        self.baseline     = float( self.input_dict['beam']['baseline'])
+
+    def read_detector(self):
+
+        # extract detector parameters
+        self.pdim           = int(self.input_dict['detector']['pdim'])
+        self.omega_detector = [float(w) for w in self.input_dict['detector']['omega']]
+        self.theta_detector = [float(t) for t in self.input_dict['detector']['theta']]
+        self.phi_detector   = [float(p) for p in self.input_dict['detector']['phi']]
 
 
 class H5Writer():
@@ -163,6 +172,27 @@ def write_finalstate(filename,omega,theta,spectrum):
         finalstate['spectrum']=spectrum
 
     return
+
+
+class H5Reader():
+
+    def __init__(self):
+        pass
+
+
+    def read(self):
+        with h5py.File(self.filename+'.h5' ,'r') as ff:
+
+            self.K_photon       = ff['final-state/photon/momentum'][()]
+            self.X_photon       = ff['final-state/photon/position'][()]
+            self.W_photon       = ff['final-state/photon/weight'  ][()]
+            self.Stokes_photon  = ff['final-state/photon/Stokes'  ][()]
+
+            self.xi_peak        = ff['final-state/photon/xi_peak' ][()]
+
+            self.X_electron     = ff['final-state/electron/position'][()]
+            self.P_electron     = ff['final-state/electron/momentum'][()]
+            self.W_electron     = ff['final-state/electron/weight'][()]
 
 
 

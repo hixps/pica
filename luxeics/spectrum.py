@@ -118,10 +118,21 @@ class Compton_Spectrum_Full(Compton_Spectrum):
     def Ein(self):
         # incident polarization vector
         Ein_0 = 0
-        Ein_1 = self.laser_poldegree * np.cos(self.laser_polangle)
-        Ein_2 = self.laser_poldegree * np.sin(self.laser_polangle)
+        Ein_1 = np.cos(self.laser_polangle)
+        Ein_2 = np.sin(self.laser_polangle)
         Ein_3 = 0
         return (Ein_0, Ein_1, Ein_2, Ein_3)
+
+    @property
+    def Ein_ortho(self):
+        #needed if incident laser is not fully polarized
+        Ein_0 = 0
+        Ein_1 = np.sin(self.laser_polangle)
+        Ein_2 = -np.cos(self.laser_polangle)
+        Ein_3 = 0
+        return (Ein_0, Ein_1, Ein_2, Ein_3)
+    
+
 
     @property
     def Eout_1(self):
@@ -158,6 +169,9 @@ class Compton_Spectrum_Full(Compton_Spectrum):
 
     def cross_section(self):
 
+        if self.laser_poldegree < 1:
+            print ('Warning! Incident polarization degree set to value < 1. This is not implemented and will be ignored.')
+
         # Epsilon_pi = - self.U_in[1]
         # Epsilon_pf = - self.U_in[1] + self.omega/elec_mass * self.nx
         # Polarizationbracket = 2*(Epsilon_pi)/self.x - 2*Epsilon_pf/self.y
@@ -185,10 +199,6 @@ class Compton_Spectrum_Full(Compton_Spectrum):
 
         F          = 0.5*(M0 +  M1*M1 + M2*M2)
 
-        # print ( F  )
-        # print ( F2 )
-
-        # prefactor   = finestruct * self.a0**2 * self.omega / (4*np.pi**2) / elec_mass**2 / self.b0**2 / (1-self.s)
         laser_spec  = laser_spectum(self.L,self.sigma)
         return self.prefactor * laser_spec * F
 

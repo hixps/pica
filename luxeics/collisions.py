@@ -8,7 +8,7 @@ from .constants import hbarc,c, elec_mass,finestruct, joule_per_eV
 from .spectrum  import Compton_Spectrum_Greiner, Compton_Spectrum_Landau, Compton_Spectrum_Full
 from .__init__  import __version__
 from .auxiliary import beam_covariance_matrix, gaussian_sum_normalized
-from .inout     import H5Writer, ParameterReader
+from .inout     import H5Writer, ParameterReader, H5Reader
 
 
 
@@ -17,8 +17,67 @@ Routines for a collision of a beam with a laser pulse
 """
 
 
+class ICSAnalysis():
 
-class ICSSimulation(H5Writer, ParameterReader):
+    def __init__(self):
+        pass
+
+    @property
+    def phi(self):
+        _,K1,K2,_ = self.K_photon
+        phi =  np.arctan2(K2,K1)
+        return phi
+
+
+    # rotated Stokes parameters in lab frame
+    @property
+    def Stokes1_labframe(self):
+        Stokes1,_,Stokes3 = self.Stokes_photon
+        phi = self.phi
+        Stokes_rot1 = np.sin(2*phi) * Stokes3 + np.cos(2*phi) * Stokes1
+        return Stokes_rot1
+
+    @property
+    def Stokes3_labframe(self):
+        Stokes1,_,Stokes3 = self.Stokes_photon
+        phi = self.phi
+        Stokes_rot3 = np.cos(2*phi) * Stokes3 - np.sin(2*phi) * Stokes1
+        return Stokes_rot3
+    
+    @property
+    def PolarizationDegree(self):
+        Stokes1,_,Stokes3 = self.Stokes_photon
+        PolDegree = np.sqrt(Stokes1**2 + Stokes3**2 )
+        return PolDegree
+
+    @property
+    def thetax(self):
+        _,K1,_,K3 =  self.K_photon
+        _thetax = np.arctan2(K1,K3)
+        return _thetax
+
+    @property
+    def thetay(self):
+        _,_,K2,K3 =  self.K_photon
+        _thetay = np.arctan2(K2,K3)
+        return _thetay  
+
+    @property
+    def theta(self):
+        return np.sqrt( self.thetax**2 + self.thetay**2 )
+    
+
+    @property
+    def xoffset(self):
+        return self.thetax * self.baseline
+
+    @property
+    def yoffset(self):
+        return self.thetay * self.baseline
+
+
+
+class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
 
     def __init__(self, input_filename ):
 
@@ -40,6 +99,8 @@ class ICSSimulation(H5Writer, ParameterReader):
 
         self.read_laser_parameters()
         self.read_beam_parameters()
+        self.read_detector()
+
 
         # translate Tpulse==FWHM in fs --> sigma parameter which is dimensionless, specific for cos^2 envelope
         self.sigma = 0.25*np.pi/np.arccos(1/2**0.25)*c/hbarc * self.Tpulse * self.omega0
@@ -48,7 +109,7 @@ class ICSSimulation(H5Writer, ParameterReader):
         # the numerical factor is 0.25*pi/arccos(1/2**(1/4)) * 1.52, where the factor 1.52 comes from the transition from eV to fs
 
 
-        self.total_energy    = 3/32 * self.omega0**2 * self.a0**2 * elec_mass**2 / finestruct * self.w0**2 * self.sigma
+        self.total_energy    = 3/32 * self.omega0 * self.a0**2 * elec_mass**2 / finestruct * self.w0**2 * self.sigma / hbarc**2
         self.total_energy_J  = self.total_energy * joule_per_eV
 
         if self.sigma_rescale:
@@ -63,33 +124,34 @@ class ICSSimulation(H5Writer, ParameterReader):
             self.sigma_rescalefactor = 1.
 
 
-        # initialize ouput arrays
-        self.xi_peak        = []
-        self.X_photon       = []
-        self.K_photon       = []
-        self.W_photon       = []
-
-        self.Stokes_photon  = []
-
-        self.X_electron     = []
-        self.P_electron     = []
-        self.W_electron     = []
-
         self.a0_freq_correction = bool(self.input_dict['control']['detector']['a0_freq_correction'])
+
+
+        # initialize ouput arrays
+        self.X_photon       = np.empty((4,0), dtype=float)
+        self.K_photon       = np.empty((4,0), dtype=float)
+        self.W_photon       = np.empty(0, dtype=float)
+        self.Stokes_photon  = np.empty((3,0), dtype=float)
+        self.xi_peak        = np.empty(0, dtype=float)
+
+
+        self.X_electron     = np.empty((4,0), dtype=float)
+        self.P_electron     = np.empty((4,0), dtype=float)
+        self.W_electron     = np.empty(0, dtype=float)
 
 
     def run(self):
 
         self.define_batches()
-        self.define_detector()
 
         for j,n in enumerate(self.sampling_batches):
             print (j,n)
+            # print (self.W_photon.shape)
+            # print (self.K_photon.shape)
             self.MC_sampling_one_batch(j,n)
 
         self.write_file()
 
-        return True
 
 
 
@@ -127,12 +189,6 @@ class ICSSimulation(H5Writer, ParameterReader):
 
 
 
-    def define_detector(self):
-
-        # extract detector parameters
-        self.omega_detector = [float(w) for w in self.input_dict['detector']['omega']]
-        self.theta_detector = [float(t) for t in self.input_dict['detector']['theta']]
-        self.phi_detector   = [float(p) for p in self.input_dict['detector']['phi']]
 
 
     def generate_electron_beam(self, number_sample_electrons):
@@ -198,27 +254,26 @@ class ICSSimulation(H5Writer, ParameterReader):
         phi          = np.random.uniform(self.phi_detector[0]  , self.phi_detector[1]  , number_sample_electrons)
         
 
-        spec_weight  =  self.sigma_rescalefactor
-
-
         Spectrum_object = self.Compton_Spectrum( U_in , xi_peak , self.omega0 , self.sigma / self.sigma_rescalefactor , 
                                                     omega, theta, phi, 
                                                     self.poldegree, self.polangle, self.a0_freq_correction )
         rad_int         = Spectrum_object.cross_section()
 
 
-        spectrum = spec_weight * rad_int * np.sin(theta)
+        spectrum = self.sigma_rescalefactor * rad_int * np.sin(theta)
         spec_max = np.amax(spectrum)
 
 
 
-        s_val        = np.random.uniform(0             , spec_max,       number_sample_electrons)
+        s_val        = np.random.uniform(0             , spec_max,       number_sample_electrons )
 
 
         samplingvolume     = spec_max * (self.omega_detector[1]-self.omega_detector[0]) \
                                       * (self.theta_detector[1]-self.theta_detector[0]) \
                                       * (self.phi_detector[1]  -self.phi_detector[0])
+
         base_photon_weight = samplingvolume * self.electron_weight
+
 
         # selector1 are the particles that have been successfully sampled
         selector1          = s_val < spectrum
@@ -268,23 +323,29 @@ class ICSSimulation(H5Writer, ParameterReader):
                                                     self.poldegree, self.polangle, self.a0_freq_correction )
         S1_new, S2_new, S3_new  = sampled_Spectrum_object.StokesParameters()
 
-        # S1_new, S2_new, S3_new = StokesParameters( sampled_U_in , self.a0 , self.omega0 , self.sigma , sampled_omega, sampled_theta, sampled_phi , self.S3 )
 
 
 
-        # store the sampled photons in the corresponding lists of the class instance
 
-        self.xi_peak.extend(       sampled_xi_peak )
-
-        self.X_photon.extend(      np.asarray( (sampled_t,sampled_x,sampled_y,sampled_z) ).T)
-        self.K_photon.extend(      np.asarray( (K0,K1,K2,K3) ).T                )
-        self.W_photon.extend(      base_photon_weight * np.ones(number_photons)    )
-        self.Stokes_photon.extend( np.asarray([S1_new,S2_new,S3_new]).T )
+        sampled_weights    = base_photon_weight * np.ones(number_photons)
+        sampled_K_photon   = np.asarray( (K0,K1,K2,K3) )
+        sampled_X          = np.asarray( (sampled_t,sampled_x,sampled_y,sampled_z) )
+        assigned_Stokes    = np.asarray( (S1_new,S2_new,S3_new) )
+        sampled_P_electron = np.asarray( (pt_out,px_out,py_out,pz_out) )
 
 
-        self.X_electron.extend( np.asarray( (sampled_t,sampled_x,sampled_y,sampled_z) ).T )
-        self.P_electron.extend( np.asarray( (pt_out,px_out,py_out,pz_out) ).T )
-        self.W_electron.extend( base_photon_weight * np.ones(number_photons)     )
+
+        self.xi_peak      = np.concatenate( (self.xi_peak,    sampled_xi_peak     ) , axis=0)
+        self.W_photon     = np.concatenate( ( self.W_photon,  sampled_weights     ) , axis=0)
+        self.W_electron   = np.concatenate( (self.W_electron, sampled_weights     ) , axis=0)
+
+        self.X_photon      = np.concatenate( (self.X_photon,   sampled_X          ) , axis=1)
+        self.K_photon      = np.concatenate( (self.K_photon,   sampled_K_photon   ) , axis=1)
+        self.Stokes_photon = np.concatenate( (self.Stokes_photon, assigned_Stokes ) , axis=1)
+
+        self.X_electron    = np.concatenate( (self.X_electron, sampled_X          ) , axis=1)
+        self.P_electron    = np.concatenate( (self.P_electron, sampled_P_electron ) , axis=1)
+
 
         print ('   total photon number:',len(self.W_electron),len(self.W_photon))
 

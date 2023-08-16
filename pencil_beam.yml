@@ -8,10 +8,10 @@ control:
 
   # rescaling of pulse duration
   laser:
-    sigma_rescale: False
-    sigma_crit:    50.
+    sigma_rescale: True
+    sigma_crit:    500.
   detector:
-    a0_freq_correction: True       # include a0-dependent frequency red-shift 
+    a0_freq_correction: False       # include a0-dependent frequency red-shift 
 
 
 beam:
@@ -19,8 +19,8 @@ beam:
   energyspread: 1e-3
   emittanceX:   0.0       # mm mrad
   emittanceY:   0.0       # mm mrad
-  sigmaX:       5.        # micron, transverse beam size
-  sigmaY:       5.        # micron, transverse beam size
+  sigmaX:       2.        # micron, transverse beam size
+  sigmaY:       2.        # micron, transverse beam size
   sigmaL:       20.       # micron, longitduinal beam size
   beam_charge:  100e-12   # beam charge in Coulomb
   beam_focus_z: 0         # Focus position of electron beam, 0 = ICS interaction point, in microns
@@ -28,14 +28,14 @@ beam:
 
 
 laser:
-  a0:     0.1                 # normalized laser vector potential
-  omega0: 4.1                 # eV, laser frequency 
-  Tpulse: 100.0               # fs, FWHM laser pulse duration
-  pulse:  cos2                # pulse envelope function, only cos2 supported so far
-  w0:     25.                 # micron, rms laser spot size
+  a0:           0.1           # normalized laser vector potential
+  omega0:       4.1           # eV, laser frequency 
+  Tpulse:       100.0         # fs, FWHM laser pulse duration
+  pulse:        cos2          # pulse envelope function, only cos2 supported so far
+  w0:           25.           # micron, rms laser spot size
   polangle:     0.            # laser polarization angle from x-axis in rad
   poldegree:    1.            # laser polarization degree
-  
+
 
 detector:                           # spectrum calculation
   pdim:  3                          # number of detector dimensions for spectrum calculation

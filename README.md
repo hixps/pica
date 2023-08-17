@@ -47,4 +47,5 @@ SIM.run()
 	* laser polarization control via polarization angle (only LP, 100% polarization degree)
 	* "Full" polarized cross section based on Jauch-Rohrlich expression with explicit polarization vectors
 	* Analysis routines for rotating Stokes vectors from scattering plane to laboratory frame	
-	
+* v1.2.2
+	* partially polarized laser	

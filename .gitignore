@@ -5,7 +5,7 @@
 *.pdf
 *.h5
 
-
+names.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

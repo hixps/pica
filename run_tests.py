@@ -3,7 +3,7 @@ import yaml
 import numpy as np
 
 
-import luxeics
+import pica
 # import matplotlib.pyplot as plt
 
 
@@ -16,7 +16,7 @@ print (input_dict)
 
 
 
-luxeics.main_program( input_filename )
+pica.main_program( input_filename )
 
 
 

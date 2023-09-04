@@ -58,13 +58,19 @@ SIM.run()
 	* partially polarized laser	
 * v1.2.3
 	* software rename luxeics -> pica
+* v1.2.4
+	* switched Stokes parameter definition to S3=circular
+	* Stokes parameter S0=1 for consistency with PTARMIGAN
+	* rename 'Stokes' group in hdf5 output to 'polarization'
 	
 	
 ## Plans for changes
-	* switch Stokes parameter definition to S3=circular
-	* record units of output in config/units
+	* record units of output, unit section in input file
+		* config/unit/position
+		* config/unit/momentum
 	* clean up config/control blocks of input/output files
 	* define 3 testbeams
 	* Gaussian temporal structure for laser 
+	* add circular polarization
 	
 	

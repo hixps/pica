@@ -31,24 +31,25 @@ class ICSAnalysis():
 
     # rotated Stokes parameters in lab frame
     @property
-    def Stokes1_labframe(self):
-        Stokes1,_,Stokes3 = self.Stokes_photon
+    def S1_labframe(self):
+        _,Stokes1,Stokes2,_ = self.S_photon
         phi = self.phi
-        Stokes_rot1 = np.sin(2*phi) * Stokes3 + np.cos(2*phi) * Stokes1
+        Stokes_rot1 = np.cos(2*phi) * Stokes1 - np.sin(2*phi) * Stokes2
         return Stokes_rot1
 
     @property
-    def Stokes3_labframe(self):
-        Stokes1,_,Stokes3 = self.Stokes_photon
+    def S2_labframe(self):
+        _,Stokes1,Stokes2,_ = self.S_photon
         phi = self.phi
-        Stokes_rot3 = np.cos(2*phi) * Stokes3 - np.sin(2*phi) * Stokes1
-        return Stokes_rot3
+        Stokes_rot2 = np.sin(2*phi) * Stokes1 + np.cos(2*phi) * Stokes2
+        return Stokes_rot2
+
     
     @property
     def PolarizationDegree(self):
-        Stokes1,_,Stokes3 = self.Stokes_photon
+        _,Stokes1,Stokes2,_ = self.S_photon
         PolDegree = np.sqrt(Stokes1**2 + Stokes3**2 )
-        return PolDegree
+        return PolDegre
 
     @property
     def thetax(self):
@@ -130,8 +131,8 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         # initialize ouput arrays
         self.X_photon       = np.empty((4,0), dtype=float)
         self.K_photon       = np.empty((4,0), dtype=float)
+        self.S_photon       = np.empty((4,0), dtype=float)
         self.W_photon       = np.empty(0, dtype=float)
-        self.Stokes_photon  = np.empty((3,0), dtype=float)
         self.xi_peak        = np.empty(0, dtype=float)
 
 
@@ -322,7 +323,7 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
                                                     sampled_omega, sampled_theta, sampled_phi, 
                                                     self.poldegree, self.polangle, self.a0_freq_correction )
         S1_new, S2_new, S3_new  = sampled_Spectrum_object.StokesParameters()
-
+        S0_new                  = np.ones(S1_new.shape, dtype=float)
 
 
 
@@ -330,21 +331,21 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         sampled_weights    = base_photon_weight * np.ones(number_photons)
         sampled_K_photon   = np.asarray( (K0,K1,K2,K3) )
         sampled_X          = np.asarray( (sampled_t,sampled_x,sampled_y,sampled_z) )
-        assigned_Stokes    = np.asarray( (S1_new,S2_new,S3_new) )
+        assigned_Stokes    = np.asarray( (S0_new,S1_new,S2_new,S3_new) )
         sampled_P_electron = np.asarray( (pt_out,px_out,py_out,pz_out) )
 
 
 
         self.xi_peak      = np.concatenate( (self.xi_peak,    sampled_xi_peak     ) , axis=0)
-        self.W_photon     = np.concatenate( ( self.W_photon,  sampled_weights     ) , axis=0)
+        self.W_photon     = np.concatenate( (self.W_photon,   sampled_weights     ) , axis=0)
         self.W_electron   = np.concatenate( (self.W_electron, sampled_weights     ) , axis=0)
 
-        self.X_photon      = np.concatenate( (self.X_photon,   sampled_X          ) , axis=1)
-        self.K_photon      = np.concatenate( (self.K_photon,   sampled_K_photon   ) , axis=1)
-        self.Stokes_photon = np.concatenate( (self.Stokes_photon, assigned_Stokes ) , axis=1)
+        self.X_photon     = np.concatenate( (self.X_photon,   sampled_X          ) , axis=1)
+        self.K_photon     = np.concatenate( (self.K_photon,   sampled_K_photon   ) , axis=1)
+        self.S_photon     = np.concatenate( (self.S_photon,   assigned_Stokes    ) , axis=1)
 
-        self.X_electron    = np.concatenate( (self.X_electron, sampled_X          ) , axis=1)
-        self.P_electron    = np.concatenate( (self.P_electron, sampled_P_electron ) , axis=1)
+        self.X_electron   = np.concatenate( (self.X_electron, sampled_X          ) , axis=1)
+        self.P_electron   = np.concatenate( (self.P_electron, sampled_P_electron ) , axis=1)
 
 
         print ('   total photon number:',len(self.W_electron),len(self.W_photon))

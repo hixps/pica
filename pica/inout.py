@@ -32,8 +32,8 @@ class ParameterReader():
         self.a0        = float( self.input_dict['laser']['a0']      )
         self.Tpulse    = float( self.input_dict['laser']['Tpulse']  )
         self.w0        = float( self.input_dict['laser']['w0']      )
-        self.poldegree = float( self.input_dict['laser']['poldegree']     )
-        self.polangle  = float( self.input_dict['laser']['polangle']     )
+        self.poldegree = float( self.input_dict['laser']['poldegree']   )
+        self.polangle  = float( self.input_dict['laser']['polangle']    )
         self.pulse     = self.input_dict['laser']['pulse']
 
         if self.pulse!='cos2':
@@ -74,8 +74,7 @@ class H5Writer():
         # version
         # commit-hash?
         # features?
-        # with h5py.File(filename+'.h5' , 'w' ) as ff:
-        ff['build/branch']  = 'devel'
+        ff['build/branch']  = 'polarization'
         ff['build/version'] = __version__
 
 
@@ -101,17 +100,17 @@ class H5Writer():
 
 
 
-            fs['photon/position']               = self.X_photon
-            fs['photon/position'].attrs['unit'] = 'micron'
-            fs['photon/momentum']               = self.K_photon
-            fs['photon/momentum'].attrs['unit'] = 'eV'
-            fs['photon/weight'  ]               = self.W_photon
-            fs['photon/weight'  ].attrs['unit'] = '1'
-            fs['photon/Stokes'  ]               = self.Stokes_photon
-            fs['photon/Stokes'  ].attrs['unit'] = '1'
+            fs['photon/position']                     = self.X_photon
+            fs['photon/position'].attrs['unit']       = 'micron'
+            fs['photon/momentum']                     = self.K_photon
+            fs['photon/momentum'].attrs['unit']       = 'eV'
+            fs['photon/weight'  ]                     = self.W_photon
+            fs['photon/weight'  ].attrs['unit']       = '1'
+            fs['photon/polarization'  ]               = self.S_photon
+            fs['photon/polarization'  ].attrs['unit'] = '1'
 
-            fs['photon/xi_peak']                = self.xi_peak
-            fs['photon/xi_peak'].attrs['unit']  = '1'
+            fs['photon/xi_peak']                      = self.xi_peak
+            fs['photon/xi_peak'].attrs['unit']        = '1'
 
 
 
@@ -145,14 +144,12 @@ def config_writer():
     # beam
     # control
     # laser
+    # units
     # input-file
-    # mpi-tasks
-    # output
     with h5py.File(filename+'.h5' , 'w' ) as ff:
 
         b=ff.create_group('config')
 
-
     return True
 
 
@@ -160,18 +157,20 @@ def config_writer():
 
     return True
 
-def write_finalstate(filename,omega,theta,spectrum):
-    # final-state
-        # ics_spectrum
-            # grid
-            # spectrum
-    with h5py.File(filename+'.h5' , 'w' ) as ff:
-        finalstate = ff.create_group('final-state')
-        finalstate['omega']=omega
-        finalstate['theta']=theta
-        finalstate['spectrum']=spectrum
+# def write_finalstate(filename,omega,theta,spectrum):
+#     # final-state
+#         # photon
+#         # electron
+#         # omega
+#         # theta
+#         # phi
+#     with h5py.File(filename+'.h5' , 'w' ) as ff:
+#         finalstate = ff.create_group('final-state')
+#         finalstate['omega']=omega
+#         finalstate['theta']=theta
+#         finalstate['spectrum']=spectrum
 
-    return
+#     return
 
 
 class H5Reader():
@@ -183,16 +182,16 @@ class H5Reader():
     def read(self):
         with h5py.File(self.filename+'.h5' ,'r') as ff:
 
-            self.K_photon       = ff['final-state/photon/momentum'][()]
-            self.X_photon       = ff['final-state/photon/position'][()]
-            self.W_photon       = ff['final-state/photon/weight'  ][()]
-            self.Stokes_photon  = ff['final-state/photon/Stokes'  ][()]
+            self.K_photon       = ff['final-state/photon/momentum'      ][()]
+            self.X_photon       = ff['final-state/photon/position'      ][()]
+            self.W_photon       = ff['final-state/photon/weight'        ][()]
+            self.S_photon       = ff['final-state/photon/polarization'  ][()]
 
-            self.xi_peak        = ff['final-state/photon/xi_peak' ][()]
+            self.xi_peak        = ff['final-state/photon/xi_peak'       ][()]
 
-            self.X_electron     = ff['final-state/electron/position'][()]
-            self.P_electron     = ff['final-state/electron/momentum'][()]
-            self.W_electron     = ff['final-state/electron/weight'][()]
+            self.X_electron     = ff['final-state/electron/position'    ][()]
+            self.P_electron     = ff['final-state/electron/momentum'    ][()]
+            self.W_electron     = ff['final-state/electron/weight'      ][()]
 
 
 

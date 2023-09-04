@@ -228,84 +228,12 @@ class Compton_Spectrum_Full(Compton_Spectrum):
         wo      = 0.5*(1-self.laser_poldegree)
 
 
-        Stokes1     = 2*(w*rho_12+wo*rho_12o)/(w*(rho_11+rho_22) + wo*(rho_11o+rho_22o) )
-        Stokes2     = 0*Stokes1 # circular polarization degree, not supported yet
-        Stokes3     = (w*(rho_11-rho_22)+wo*(rho_11o-rho_22o))/(w*(rho_11+rho_22) + wo*(rho_11o+rho_22o) )
+        Stokes1     = (w*(rho_11-rho_22)+wo*(rho_11o-rho_22o))/(w*(rho_11+rho_22) + wo*(rho_11o+rho_22o) ) # 0-90 degree polarization
+        Stokes2     = 2*(w*rho_12+wo*rho_12o)/(w*(rho_11+rho_22) + wo*(rho_11o+rho_22o) )                  # diagonal polarization
+        Stokes3     = 0*Stokes1                     # circular polarization degree, identically 0 for LP laser, not supported yet
 
         return Stokes1,Stokes2,Stokes3
 
-    # def cross_section(self):
-
-    #     if self.laser_poldegree < 1:
-    #         print ('Warning! Incident polarization degree set to value < 1. This is not implemented and will be ignored.')
-
-    #     # Epsilon_pi = - self.U_in[1]
-    #     # Epsilon_pf = - self.U_in[1] + self.omega/elec_mass * self.nx
-    #     # Polarizationbracket = 2*(Epsilon_pi)/self.x - 2*Epsilon_pf/self.y
-
-    #     # F           = 0.25*(self.x/self.y+self.y/self.x) - 0.5 * Polarizationbracket**2
-
-
-    #     # now all the scalar products
-    #     Ein_E1   = self.dot4( self.Ein, self.Eout_1)
-    #     Ein_E2   = self.dot4( self.Ein, self.Eout_2)
-
-    #     Ein_Uin  = self.dot4( self.Ein, self.U_in )
-    #     Ein_Uout = self.dot4( self.Ein, self.U_out )
-
-    #     E1_Uin   = self.dot4( self.Eout_1, self.U_in )
-    #     E1_Uout  = self.dot4( self.Eout_1, self.U_out )
-
-    #     E2_Uin   = self.dot4( self.Eout_2, self.U_in )
-    #     E2_Uout  = self.dot4( self.Eout_2, self.U_out )
-
-
-    #     M0       = 0.5*(self.x/self.y+self.y/self.x) - 1
-    #     M1       = Ein_E1 - 2*Ein_Uin*E1_Uout/self.x + 2*Ein_Uout*E1_Uin/self.y
-    #     M2       = Ein_E2 - 2*Ein_Uin*E2_Uout/self.x + 2*Ein_Uout*E2_Uin/self.y
-
-    #     F          = 0.5*(M0 +  M1*M1 + M2*M2)
-
-    #     laser_spec  = laser_spectum(self.L,self.sigma)
-    #     return self.prefactor * laser_spec * F
-
-
-    # def StokesParameters( self ):
-
-
-    #     # now all the scalar products
-    #     # now all the scalar products
-    #     Ein_E1   = self.dot4( self.Ein, self.Eout_1)
-    #     Ein_E2   = self.dot4( self.Ein, self.Eout_2)
-
-    #     Ein_Uin  = self.dot4( self.Ein, self.U_in )
-    #     Ein_Uout = self.dot4( self.Ein, self.U_out )
-
-    #     E1_Uin   = self.dot4( self.Eout_1, self.U_in )
-    #     E1_Uout  = self.dot4( self.Eout_1, self.U_out )
-
-    #     E2_Uin   = self.dot4( self.Eout_2, self.U_in )
-    #     E2_Uout  = self.dot4( self.Eout_2, self.U_out )
-
-
-    #     M0       = 0.5*(self.x/self.y+self.y/self.x) - 1
-    #     M1       = Ein_E1 - 2*Ein_Uin*E1_Uout/self.x + 2*Ein_Uout*E1_Uin/self.y
-    #     M2       = Ein_E2 - 2*Ein_Uin*E2_Uout/self.x + 2*Ein_Uout*E2_Uin/self.y
-
-
-    #     rho_11 = M0 + 2 * M1*M1
-    #     rho_12 =      2 * M1*M2
-    #     rho_22 = M0 + 2 * M2*M2
-
-
-    #     Stokes1     = 2*rho_12/(rho_11+rho_22)
-    #     Stokes2     = 0*Stokes1 # circular polarization degree, not supported yet
-    #     Stokes3     = (rho_11-rho_22)/(rho_11+rho_22)
-
-    #     # print (E1_Uin.shape,M0.shape,M1.shape,rho_11.shape,Stokes1.shape)
-    #     # print (Stokes1,Stokes2,Stokes3)
-
-    #     return Stokes1,Stokes2,Stokes3
 
 
 class Compton_Spectrum_Landau(Compton_Spectrum):
@@ -451,12 +379,10 @@ class Compton_Spectrum_Greiner(Compton_Spectrum):
         rho_22 = M0 + 2 * M2*M2
 
 
-        Stokes1     = 2*rho_12/(rho_11+rho_22)
-        Stokes2     = 0*Stokes1
-        Stokes3     = (rho_11-rho_22)/(rho_11+rho_22)
+        Stokes2     = 2*rho_12/(rho_11+rho_22)
+        Stokes1     = (rho_11-rho_22)/(rho_11+rho_22)
+        Stokes3     = 0*Stokes1
 
-        # print (Stokes3)
-        # print ((M1**2-M2**2)/(M0+M1**2+M2**2))
 
         return Stokes1,Stokes2,Stokes3
 

@@ -103,6 +103,24 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         self.read_detector()
 
 
+        self.unit_X = self.input_dict['unit']['position']
+        if self.unit_X not in ('micron',):
+            raise ValueError
+
+        self.unit_P = self.input_dict['unit']['momentum']
+        if self.unit_P not in ('eV','keV','MeV','GeV'):
+            raise ValueError
+
+        if self.unit_P == 'eV':
+            self.momentum_scale = 1
+        elif self.unit_P == 'keV':
+            self.momentum_scale = 1000
+        elif self.unit_P == 'MeV':
+            self.momentum_scale = 1e6
+        elif self.unit_P == 'GeV':
+            self.momentum_scale == 1e9
+
+
         # translate Tpulse==FWHM in fs --> sigma parameter which is dimensionless, specific for cos^2 envelope
         self.sigma = 0.25*np.pi/np.arccos(1/2**0.25)*c/hbarc * self.Tpulse * self.omega0
         # print (0.25*np.pi/np.arccos(1/2**0.25)*c/hbarc , 2.0852201339)
@@ -113,16 +131,10 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         self.total_energy    = 3/32 * self.omega0 * self.a0**2 * elec_mass**2 / finestruct * self.w0**2 * self.sigma / hbarc**2
         self.total_energy_J  = self.total_energy * joule_per_eV
 
-        if self.sigma_rescale:
-            self.sigma_crit =  float( self.input_dict['control']['laser']['sigma_crit']  )
-            if self.sigma > self.sigma_crit:
-                self.sigma_rescalefactor = self.sigma / self.sigma_crit
-                print (f' >> rescale pulse duration: {self.sigma:.2f} -> {self.sigma_crit:.2f}: sigma_rescalefactor = {self.sigma_rescalefactor:.2f}')
-            else:
-                self.sigma_rescalefactor = 1.
-        else:
-            # self.sigma_crit          = 0
-            self.sigma_rescalefactor = 1.
+        self.pulse_rescale_bias = float( self.input_dict['control']['laser']['pulse_rescale_bias']  )
+        print (f' >> pulse rescaling bias: {self.pulse_rescale_bias:02.2f}: sigma = {self.sigma:.2f}     -> {self.sigma/self.pulse_rescale_bias:.2f}    ')
+        print (f'                               : TFWHM = {self.Tpulse:.2f} fs -> {self.Tpulse/self.pulse_rescale_bias:.2f} fs')
+
 
 
         self.a0_freq_correction = bool(self.input_dict['control']['detector']['a0_freq_correction'])
@@ -255,13 +267,13 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         phi          = np.random.uniform(self.phi_detector[0]  , self.phi_detector[1]  , number_sample_electrons)
         
 
-        Spectrum_object = self.Compton_Spectrum( U_in , xi_peak , self.omega0 , self.sigma / self.sigma_rescalefactor , 
+        Spectrum_object = self.Compton_Spectrum( U_in , xi_peak , self.omega0 , self.sigma / self.pulse_rescale_bias , 
                                                     omega, theta, phi, 
                                                     self.poldegree, self.polangle, self.a0_freq_correction )
         rad_int         = Spectrum_object.cross_section()
 
 
-        spectrum = self.sigma_rescalefactor * rad_int * np.sin(theta)
+        spectrum = self.pulse_rescale_bias * rad_int * np.sin(theta)
         spec_max = np.amax(spectrum)
 
 
@@ -319,7 +331,7 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         # Calculation of Stokes Parameters of emitted Photons
         sampled_U_in  = np.asarray([pt0[selector1],px0[selector1],py0[selector1],pz0[selector1]])
 
-        sampled_Spectrum_object = self.Compton_Spectrum( sampled_U_in , sampled_xi_peak , self.omega0 , self.sigma / self.sigma_rescalefactor , 
+        sampled_Spectrum_object = self.Compton_Spectrum( sampled_U_in , sampled_xi_peak , self.omega0 , self.sigma / self.pulse_rescale_bias , 
                                                     sampled_omega, sampled_theta, sampled_phi, 
                                                     self.poldegree, self.polangle, self.a0_freq_correction )
         S1_new, S2_new, S3_new  = sampled_Spectrum_object.StokesParameters()
@@ -329,10 +341,10 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
 
 
         sampled_weights    = base_photon_weight * np.ones(number_photons)
-        sampled_K_photon   = np.asarray( (K0,K1,K2,K3) )
+        sampled_K_photon   = np.asarray( (K0,K1,K2,K3) )                 / self.momentum_scale
         sampled_X          = np.asarray( (sampled_t,sampled_x,sampled_y,sampled_z) )
         assigned_Stokes    = np.asarray( (S0_new,S1_new,S2_new,S3_new) )
-        sampled_P_electron = np.asarray( (pt_out,px_out,py_out,pz_out) )
+        sampled_P_electron = np.asarray( (pt_out,px_out,py_out,pz_out) ) / self.momentum_scale
 
 
 

@@ -25,7 +25,7 @@ class ParameterReader():
 
     def read_laser_parameters(self):
 
-        self.sigma_rescale           = bool(self.input_dict['control']['laser']['sigma_rescale'])
+        # self.sigma_rescale           = bool(self.input_dict['control']['laser']['sigma_rescale'])
 
 
         self.omega0    = float( self.input_dict['laser']['omega0']  )
@@ -101,9 +101,9 @@ class H5Writer():
 
 
             fs['photon/position']                     = self.X_photon
-            fs['photon/position'].attrs['unit']       = 'micron'
+            fs['photon/position'].attrs['unit']       = self.unit_X
             fs['photon/momentum']                     = self.K_photon
-            fs['photon/momentum'].attrs['unit']       = 'eV'
+            fs['photon/momentum'].attrs['unit']       = self.unit_P
             fs['photon/weight'  ]                     = self.W_photon
             fs['photon/weight'  ].attrs['unit']       = '1'
             fs['photon/polarization'  ]               = self.S_photon
@@ -115,9 +115,9 @@ class H5Writer():
 
 
             fs['electron/position']               = self.X_electron
-            fs['electron/position'].attrs['unit'] = 'micron'
+            fs['electron/position'].attrs['unit'] = self.unit_X
             fs['electron/momentum']               = self.P_electron
-            fs['electron/momentum'].attrs['unit'] = 'eV'
+            fs['electron/momentum'].attrs['unit'] = self.unit_P
             fs['electron/weight'  ]               = self.W_electron
             fs['electron/weight'  ].attrs['unit'] = '1'
 

@@ -62,15 +62,17 @@ SIM.run()
 	* switched Stokes parameter definition to S3=circular
 	* Stokes parameter S0=1 for consistency with PTARMIGAN
 	* rename 'Stokes' group in hdf5 output to 'polarization'
+	* switched to 'pulse_rescale_bias' instead of 'sigma_rescaling' parameter
 	
 	
 ## Plans for changes
-	* record units of output, unit section in input file
-		* config/unit/position
-		* config/unit/momentum
-	* clean up config/control blocks of input/output files
-	* define 3 testbeams
-	* Gaussian temporal structure for laser 
-	* add circular polarization
+
+* record units of output, unit section in input file
+	* config/unit/position
+	* config/unit/momentum
+* clean up config/control blocks of input/output files
+* define 3 testbeams
+* Gaussian temporal structure for laser 
+* add circular polarization
 	
 	

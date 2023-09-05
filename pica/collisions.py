@@ -114,11 +114,11 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         if self.unit_P == 'eV':
             self.momentum_scale = 1
         elif self.unit_P == 'keV':
-            self.momentum_scale = 1000
+            self.momentum_scale = 1e3
         elif self.unit_P == 'MeV':
             self.momentum_scale = 1e6
         elif self.unit_P == 'GeV':
-            self.momentum_scale == 1e9
+            self.momentum_scale = 1e9
 
 
         # translate Tpulse==FWHM in fs --> sigma parameter which is dimensionless, specific for cos^2 envelope

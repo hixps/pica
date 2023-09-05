@@ -49,7 +49,7 @@ class ICSAnalysis():
     def LinearPolarizationDegree(self):
         _,Stokes1,Stokes2,_ = self.S_photon
         PolDegree = np.sqrt(Stokes1**2 + Stokes1**2 )
-        return PolDegre
+        return PolDegree
 
     @property
     def thetax(self):

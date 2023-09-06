@@ -5,7 +5,7 @@ import h5py
 from scipy.integrate import cumtrapz
 
 from .constants import hbarc,c, elec_mass,finestruct, joule_per_eV
-from .spectrum  import Compton_Spectrum_Greiner, Compton_Spectrum_Landau, Compton_Spectrum_Full
+from .spectrum  import Compton_Spectrum_Full
 from .__init__  import __version__
 from .auxiliary import beam_covariance_matrix, gaussian_sum_normalized
 from .inout     import H5Writer, ParameterReader, H5Reader

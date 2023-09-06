@@ -66,6 +66,8 @@ SIM.run()
 	* record units of output, unit section in input file
 		* config/unit/position = ('micron')
 		* config/unit/momentum = ('eV','keV','MeV','GeV')
+	* pulse length parameter renamed to TFWHM
+	* cleanup of old cross sections, only Cross_Section_Full useable
 
 	
 	

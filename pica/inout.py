@@ -25,12 +25,10 @@ class ParameterReader():
 
     def read_laser_parameters(self):
 
-        # self.sigma_rescale           = bool(self.input_dict['control']['laser']['sigma_rescale'])
-
 
         self.omega0    = float( self.input_dict['laser']['omega0']  )
         self.a0        = float( self.input_dict['laser']['a0']      )
-        self.Tpulse    = float( self.input_dict['laser']['Tpulse']  )
+        self.TFWHM     = float( self.input_dict['laser']['TFWHM']  )
         self.w0        = float( self.input_dict['laser']['w0']      )
         self.poldegree = float( self.input_dict['laser']['poldegree']   )
         self.polangle  = float( self.input_dict['laser']['polangle']    )

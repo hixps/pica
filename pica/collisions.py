@@ -90,13 +90,17 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
 
         self.xsection = self.input_dict['control']['xsection']
 
-        if self.xsection=='Landau':
-            self.Compton_Spectrum = Compton_Spectrum_Landau
-        elif self.xsection=='Greiner':
-            self.Compton_Spectrum = Compton_Spectrum_Greiner
-        elif self.xsection=='Full':
-            self.Compton_Spectrum = Compton_Spectrum_Full
 
+        if self.xsection=='Full':
+            self.Compton_Spectrum = Compton_Spectrum_Full
+        else:
+            raise ValueError
+        # elif self.xsection=='Landau':
+        #     print ('Warning: do not use')
+        #     self.Compton_Spectrum = Compton_Spectrum_Landau
+        # elif self.xsection=='Greiner':
+        #     print ('Warning: do not use')
+        #     self.Compton_Spectrum = Compton_Spectrum_Greiner
 
         self.read_laser_parameters()
         self.read_beam_parameters()
@@ -121,15 +125,17 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
             self.momentum_scale = 1e9
 
 
-        # translate Tpulse==FWHM in fs --> sigma parameter which is dimensionless, specific for cos^2 envelope
-        self.sigma = 0.25*np.pi/np.arccos(1/2**0.25)*c/hbarc * self.Tpulse * self.omega0
+
+        # translate TFWHM==FWHM in fs --> sigma parameter which is dimensionless, specific for cos^2 envelope
+        self.sigma = 0.25*np.pi/np.arccos(1/2**0.25)*c/hbarc * self.TFWHM * self.omega0
         # print (0.25*np.pi/np.arccos(1/2**0.25)*c/hbarc , 2.0852201339)
-        # self.sigma = 2.0852201339 * self.Tpulse * self.omega0
+        # self.sigma = 2.0852201339 * self.TFWHM * self.omega0
         # the numerical factor is 0.25*pi/arccos(1/2**(1/4)) * 1.52, where the factor 1.52 comes from the transition from eV to fs
 
-
+        # energy specific for cos^2 envelope
         self.total_energy    = 3/32 * self.omega0 * self.a0**2 * elec_mass**2 / finestruct * self.w0**2 * self.sigma / hbarc**2
         self.total_energy_J  = self.total_energy * joule_per_eV
+
 
         self.pulse_rescale_bias = float( self.input_dict['control']['laser']['pulse_rescale_bias']  )
         print (f' >> pulse rescaling bias: {self.pulse_rescale_bias:02.2f}: sigma = {self.sigma:.2f}     -> {self.sigma/self.pulse_rescale_bias:.2f}    ')

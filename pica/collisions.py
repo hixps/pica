@@ -139,7 +139,7 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
 
         self.pulse_rescale_bias = float( self.input_dict['control']['laser']['pulse_rescale_bias']  )
         print (f' >> pulse rescaling bias: {self.pulse_rescale_bias:02.2f}: sigma = {self.sigma:.2f}     -> {self.sigma/self.pulse_rescale_bias:.2f}    ')
-        print (f'                               : TFWHM = {self.TFWHM:.2f} fs -> {self.TFWHM/self.pulse_rescale_bias:.2f} fs')
+        print (f'                              : TFWHM = {self.TFWHM:.2f} fs -> {self.TFWHM/self.pulse_rescale_bias:.2f} fs')
 
 
 
@@ -350,7 +350,7 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
                                                     self.poldegree, self.polangle, self.a0_freq_correction )
         
         S1, S2, S3     = sampled_Spectrum_object.StokesParameters()
-        S0             = np.ones(S1_new.shape, dtype=float)
+        S0             = np.ones(S1.shape, dtype=float)
 
 
 

@@ -351,8 +351,8 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         
         S1_sp, S2_sp, S3    = sampled_Spectrum_object.StokesParameters()
 
-        S1 =   np.cos(2*sampled_phi) * S1_sp - np.sin(2*sampled_phi) * S2_sp
-        S2 = - np.sin(2*sampled_phi) * S1_sp + np.cos(2*sampled_phi) * S2_sp
+        S1 = np.cos(2*sampled_phi) * S1_sp - np.sin(2*sampled_phi) * S2_sp
+        S2 = np.sin(2*sampled_phi) * S1_sp + np.cos(2*sampled_phi) * S2_sp
 
         S0             = np.ones(S1.shape, dtype=float)
 

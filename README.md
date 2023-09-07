@@ -68,7 +68,9 @@ SIM.run()
 		* config/unit/momentum = ('eV','keV','MeV','GeV')
 	* pulse length parameter renamed to TFWHM
 	* cleanup of old cross sections, only Cross_Section_Full useable
-
+* v1.2.5
+	* Stokes parameters in the x-z plane are now standard
+	* Implemented methods to calculate Stokes parameters in scattering plane
 	
 	
 ## Plans for changes

@@ -31,17 +31,17 @@ class ICSAnalysis():
 
     # rotated Stokes parameters in lab frame
     @property
-    def S1_labframe(self):
+    def S1_scatteringplane(self):
         _,Stokes1,Stokes2,_ = self.S_photon
         phi = self.phi
-        Stokes_rot1 = np.cos(2*phi) * Stokes1 - np.sin(2*phi) * Stokes2
+        Stokes_rot1 = np.cos(2*phi) * Stokes1 + np.sin(2*phi) * Stokes2
         return Stokes_rot1
 
     @property
-    def S2_labframe(self):
+    def S2_scatteringplane(self):
         _,Stokes1,Stokes2,_ = self.S_photon
         phi = self.phi
-        Stokes_rot2 = np.sin(2*phi) * Stokes1 + np.cos(2*phi) * Stokes2
+        Stokes_rot2 = - np.sin(2*phi) * Stokes1 + np.cos(2*phi) * Stokes2
         return Stokes_rot2
 
     
@@ -349,7 +349,11 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
                                                     sampled_omega, sampled_theta, sampled_phi, 
                                                     self.poldegree, self.polangle, self.a0_freq_correction )
         
-        S1, S2, S3     = sampled_Spectrum_object.StokesParameters()
+        S1_sp, S2_sp, S3    = sampled_Spectrum_object.StokesParameters()
+
+        S1 =   np.cos(2*sampled_phi) * S1_sp - np.sin(2*sampled_phi) * S2_sp
+        S2 = - np.sin(2*sampled_phi) * S1_sp + np.cos(2*sampled_phi) * S2_sp
+
         S0             = np.ones(S1.shape, dtype=float)
 
 

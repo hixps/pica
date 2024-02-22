@@ -8,38 +8,42 @@ control:
 
   # rescaling of pulse duration
   laser:
-    sigma_rescale: True
-    sigma_crit:    500.
+    pulse_rescale_bias:    1.      # > 1 for better sampling at the cost of larger natural bandwidth
   detector:
     a0_freq_correction: False       # include a0-dependent frequency red-shift 
 
 
+unit:
+  momentum:    GeV
+  position:    micron
+
+
 beam:
   gamma:        32289.62818003914
-  energyspread: 1e-3
-  emittanceX:   0.0       # mm mrad
-  emittanceY:   0.0       # mm mrad
-  sigmaX:       2.        # micron, transverse beam size
-  sigmaY:       2.        # micron, transverse beam size
-  sigmaL:       20.       # micron, longitduinal beam size
-  beam_charge:  100e-12   # beam charge in Coulomb
-  beam_focus_z: 0         # Focus position of electron beam, 0 = ICS interaction point, in microns
-  baseline:     7.5e6     # Distance between ICS and Stong IP in microns
+  energyspread: 0.001
+  emittanceX:   1.4           # mm mrad
+  emittanceY:   1.4           # mm mrad
+  sigmaX:       5.            # micron, transverse beam size
+  sigmaY:       5.            # micron, transverse beam size
+  sigmaL:       20.           # micron, longitduinal beam size
+  beam_charge:  100e-12       # beam charge in Coulomb
+  beam_focus_z: 0             # Focus position of electron beam, 0 = ICS interaction point, in microns
+  baseline:     7.5e6         # Distance between ICS and Stong IP in microns
 
 
 laser:
   a0:           0.1           # normalized laser vector potential
-  omega0:       4.1           # eV, laser frequency 
-  Tpulse:       100.0         # fs, FWHM laser pulse duration
+  omega0:       4.65          # eV, laser frequency 
+  TFWHM:        100.0         # fs, FWHM laser pulse duration
   pulse:        cos2          # pulse envelope function, only cos2 supported so far
-  w0:           25.           # micron, rms laser spot size
+  w0:           1000.         # micron, rms laser spot size
   polangle:     0.            # laser polarization angle from x-axis in rad
   poldegree:    1.            # laser polarization degree
 
 
 detector:                           # spectrum calculation
   pdim:  3                          # number of detector dimensions for spectrum calculation
-  omega: [5.0e9,9.2e9]              # [omegamin,omegamax] , eV
-  theta: [0,15e-6]                  # [thetamin,thetamax] , rad
+  omega: [5.5e9,9.5e9]              # [omegamin,omegamax] , eV
+  theta: [0,30e-6]                  # [thetamin,thetamax] , rad
   phi:   [0.0,6.283185307179586]    # [phimin,phimax]     , rad
 

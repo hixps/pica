@@ -84,11 +84,19 @@ class AtomicSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
 
         print ("AtomicSimulation!")
 
+
         self.filename = input_filename
 
         with open( self.filename + '.yml', 'r' ) as stream:
             self.input_dict = yaml.load(stream, Loader=yaml.SafeLoader)
 
+
+        self.targettype = self.input_dict['control']['beam']['targettype']
+        print (f'Target type is <<{self.targettype}>>')
+        
+        if self.targettype=='orbital':
+            from .orbitals import OrbitalSampler
+            self.OrbitalSamplerObject = OrbitalSampler(self.input_dict)
 
         self.xsection = self.input_dict['control']['xsection']
 
@@ -97,12 +105,6 @@ class AtomicSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
             self.Compton_Spectrum = Compton_Spectrum_Full
         else:
             raise ValueError
-        # elif self.xsection=='Landau':
-        #     print ('Warning: do not use')
-        #     self.Compton_Spectrum = Compton_Spectrum_Landau
-        # elif self.xsection=='Greiner':
-        #     print ('Warning: do not use')
-        #     self.Compton_Spectrum = Compton_Spectrum_Greiner
 
         self.read_laser_parameters()
         self.read_beam_parameters()
@@ -207,40 +209,45 @@ class AtomicSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
 
     def generate_electron_distribution(self, number_sample_electrons):
         
-        
-        # rms angles for x and y space
-        rms_angle_X   = self.emittance_X / self.beam_size_X / self.gamma0
-        rms_angle_Y   = self.emittance_Y / self.beam_size_Y / self.gamma0
-        
-        
-        #Mean and Covariant matrices for bivariate gaussian
-        
-        mean_x = [0,0]  # x-offset and x' offset for focus 
-        cov_x = beam_covariance_matrix(self.beam_size_X, rms_angle_X, self.beam_focus_z )
 
-        mean_y = [0,0]  # y-offset and y' offset for focus
-        cov_y = beam_covariance_matrix(self.beam_size_Y, rms_angle_Y, self.beam_focus_z )
-
-        
-        #Sampling (x,x') and (y,y')
-        x,theta_x = np.random.multivariate_normal(mean_x, cov_x, number_sample_electrons).T
-        y,theta_y = np.random.multivariate_normal(mean_y, cov_y, number_sample_electrons).T
-        
-        print (x,theta_x)
-        
-        gamma        = self.gamma0 * np.ones( number_sample_electrons )
-        # np.random.normal( self.gamma0 , self.gamma0*self.energyspread , number_sample_electrons )
-        # gamma        = np.random.normal( self.gamma0 , self.gamma0*self.energyspread , number_sample_electrons )
-        beta         = np.sqrt(1-1./gamma**2)
-
-        
-        pz0          = gamma*beta*np.cos(theta_x)*np.cos(theta_y)
-        px0          = gamma*beta*np.sin(theta_x)
-        py0          = gamma*beta*np.sin(theta_y)
-        pt0          = np.sqrt( 1 + px0**2 + py0**2 + pz0**2 )
+        if self.targettype=='orbital':
+            p_au     = self.OrbitalSamplerObject.SampleFromCDF( number_sample_electrons )
+            p        = p_au * finestruct            # from atomic units to natural units, p is normalized to mc
 
 
-        return x,theta_x,y,theta_y,gamma,pt0,px0,py0,pz0
+            cos_theta = np.random.uniform(-1.,1.,number_sample_electrons)
+            phi       = np.random.uniform(0,2*np.pi,number_sample_electrons)
+
+            theta     = np.arccos(cos_theta)
+
+            x         = np.zeros(number_sample_electrons)
+            y         = np.zeros(number_sample_electrons)
+
+            pz0          = p * cos_theta
+            px0          = p * np.sin(theta) * np.cos(phi)
+            py0          = p * np.sin(theta) * np.sin(phi)
+            pt0          = np.sqrt( 1 + p**2 )            
+            # gamma        = pt0
+
+
+        elif self.targettype=='beam':
+
+            x         = np.zeros(number_sample_electrons)
+            y         = np.zeros(number_sample_electrons)
+            theta_x   = np.zeros(number_sample_electrons)
+            theta_y   = np.zeros(number_sample_electrons)
+
+            gamma        = self.gamma0 * np.ones( number_sample_electrons )
+            p            = np.sqrt(gamma**2-1.)
+
+            
+            pz0          = p*np.cos(theta_x)*np.cos(theta_y)
+            px0          = p*np.sin(theta_x)
+            py0          = p*np.sin(theta_y)
+            pt0          = np.sqrt( 1 + p**2 )
+
+
+        return x,y,pt0,px0,py0,pz0
 
 
 
@@ -251,8 +258,8 @@ class AtomicSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         print (f'  > batch {jj:03d}: {number_sample_electrons:.2g} macroelectrons of weight {self.electron_weight:.5g}')
         
         # define electron beam with correlated phase space
-        x,theta_x,y,theta_y,gamma,pt0,px0,py0,pz0 = self.generate_electron_distribution( number_sample_electrons )
-
+        # x,theta_x,y,theta_y,gamma,pt0,px0,py0,pz0 = self.generate_electron_distribution( number_sample_electrons )
+        x,y,pt0,px0,py0,pz0 = self.generate_electron_distribution( number_sample_electrons )
 
         # radial position of electron at the interaction point        
         r            = np.sqrt( x**2 + y**2 )
@@ -298,17 +305,10 @@ class AtomicSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         print ('   number photons     :' , number_photons)
 
 
-        print (omega)
-
-        # sampled_gamma   = gamma[selector1]
-        # sampled_theta_x = theta_x[selector1]
-        # sampled_theta_y = theta_y[selector1]
 
         sampled_omega   = omega[selector1]
         sampled_theta   = theta[selector1]
         sampled_phi     = phi[selector1]
-
-        print (sampled_omega)
 
         sampled_x       = x[selector1]
         sampled_y       = y[selector1]
@@ -546,7 +546,6 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         px0          = gamma*beta*np.sin(theta_x)
         py0          = gamma*beta*np.sin(theta_y)
         pt0          = np.sqrt( 1 + px0**2 + py0**2 + pz0**2 )
-
 
         return x,theta_x,y,theta_y,gamma,pt0,px0,py0,pz0
 

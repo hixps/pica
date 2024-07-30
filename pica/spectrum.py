@@ -102,8 +102,8 @@ class Compton_Spectrum():
         return self._prefactor
 
     @property
-    def prefactor2(self):
-        self._prefactor   = finestruct * self.a0**2 * self.omega / (4*np.pi**2) / elec_mass**2 / self.b0**2 / (1-self.s)
+    def prefactor_ptarmigan_benchmark(self):
+        self._prefactor   = 0.5 * finestruct * self.a0**2 * self.omega / (4*np.pi**2) / elec_mass**2 / self.b0**2 / (1-self.s)
         return self._prefactor
 
 
@@ -204,7 +204,8 @@ class Compton_Spectrum_Full(Compton_Spectrum):
         F             = 0.5*(1+self.laser_poldegree)*F_in + 0.5*(1-self.laser_poldegree)*F_in_ortho
 
         laser_spec  = laser_spectum(self.L,self.sigma)
-        return self.prefactor * laser_spec * F
+        # return self.prefactor * laser_spec * F
+        return self.prefactor_ptarmigan_benchmark * laser_spec * F
 
 
     def StokesParameters( self ):

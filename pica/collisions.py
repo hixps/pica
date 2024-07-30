@@ -136,8 +136,12 @@ class AtomicSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         # self.sigma = 2.0852201339 * self.TFWHM * self.omega0
         # the numerical factor is 0.25*pi/arccos(1/2**(1/4)) * 1.52, where the factor 1.52 comes from the transition from eV to fs
 
+
+        self.number_electrons =  self.beam_charge / 1.60217653e-19
+
+
         # energy specific for cos^2 envelope
-        self.total_energy    = 3/32 * self.omega0 * self.a0**2 * elec_mass**2 / finestruct * self.w0**2 * self.sigma / hbarc**2
+        self.total_energy    = 3/32 * self.omega0 * ( 0.5*self.a0**2 ) * elec_mass**2 / finestruct * self.w0**2 * self.sigma / hbarc**2
         self.total_energy_J  = self.total_energy * joule_per_eV
 
 
@@ -195,11 +199,11 @@ class AtomicSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
 
         print (f'n_batches={n_samp}, remainder={r_samp}, number_of_particles={sum(self.sampling_batches):.4g}={self.sample_electrons_total:.4g}')
 
-        number_electrons = int( self.beam_charge / 1.60217653e-19)
+        number_electrons_int  = int( self.number_electrons )
 
         # sample_electrons = int(5e7) # number of elecrons used for MC sampling, determines weight of each emitted photon
-        self.electron_weight  = number_electrons / self.sample_electrons_total
-        print (f' >> number_electrons   = {number_electrons}')
+        self.electron_weight  = number_electrons_int / self.sample_electrons_total
+        print (f' >> number_electrons   = {self.number_electrons:.1g} -> {number_electrons_int}')
         print (f' >> sample_electrons   = {self.sample_electrons_total}')
         print (f' >> electron weight    = {self.electron_weight:.4g}')
 
@@ -430,6 +434,9 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
             self.momentum_scale = 1e9
 
 
+        self.number_electrons =  self.beam_charge / 1.60217653e-19
+
+
 
         # translate TFWHM==FWHM in fs --> sigma parameter which is dimensionless, specific for cos^2 envelope
         self.sigma = 0.25*np.pi/np.arccos(1/2**0.25)*c/hbarc * self.TFWHM * self.omega0
@@ -438,7 +445,7 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
         # the numerical factor is 0.25*pi/arccos(1/2**(1/4)) * 1.52, where the factor 1.52 comes from the transition from eV to fs
 
         # energy specific for cos^2 envelope
-        self.total_energy    = 3/32 * self.omega0 * self.a0**2 * elec_mass**2 / finestruct * self.w0**2 * self.sigma / hbarc**2
+        self.total_energy    = 3/32 * self.omega0 * ( 0.5*self.a0**2 ) * elec_mass**2 / finestruct * self.w0**2 * self.sigma / hbarc**2
         self.total_energy_J  = self.total_energy * joule_per_eV
 
 
@@ -503,11 +510,11 @@ class ICSSimulation(H5Writer, ParameterReader, H5Reader, ICSAnalysis):
 
         print (f'n_batches={n_samp}, remainder={r_samp}, number_of_particles={sum(self.sampling_batches):.4g}={self.sample_electrons_total:.4g}')
 
-        number_electrons = int( self.beam_charge / 1.60217653e-19)
+        number_electrons_int = int( self.number_electrons )
 
         # sample_electrons = int(5e7) # number of elecrons used for MC sampling, determines weight of each emitted photon
-        self.electron_weight  = number_electrons / self.sample_electrons_total
-        print (f' >> number_electrons   = {number_electrons}')
+        self.electron_weight  = self.number_electrons / self.sample_electrons_total
+        print (f' >> number_electrons   = {self.number_electrons} -> {number_electrons_int}')
         print (f' >> sample_electrons   = {self.sample_electrons_total}')
         print (f' >> electron weight    = {self.electron_weight:.4g}')
 

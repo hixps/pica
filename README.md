@@ -71,6 +71,10 @@ SIM.run()
 * v1.2.5
 	* Stokes parameters in the x-z plane are now standard
 	* Implemented methods to calculate Stokes parameters in scattering plane
+
+* v1.2.8
+	* self.number_electrons
+	* cross section normalization benchmarked against PTARMIGAN
 	
 	
 ## Plans for changes

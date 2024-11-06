@@ -24,7 +24,7 @@ Output files in PTARMIGAN-hdf5 format: https://github.com/tgblackburn/ptarmigan
 
 ## Installation
 
-```shell
+```bash
 pip install <path to pica source>
 	
 pip install https://github.com/hixps/pica

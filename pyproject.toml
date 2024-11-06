@@ -11,7 +11,8 @@ dependencies = [
                 "numpy >= 2.0",
                 "scipy",
                 "pyyaml",
-                "h5py"
+                "h5py",
+                "dacite"
                 ]
 requires-python = ">=3.10"
 authors = [{name="Daniel Seipt", email="d.seipt@hi-jena.gsi.de"},

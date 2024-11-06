@@ -1,6 +1,11 @@
-import h5py
 import numpy as np
+import h5py
+
+from dataclasses import dataclass
+
+
 from .__init__ import __version__
+from .constants import hbar
 
 
 
@@ -18,47 +23,164 @@ final-state
 
 """
 
-class ParameterReader():
 
-    def __init__(self):
-        pass
+@dataclass
+class Control_Beam:
+    sample_electrons: float | str | int
+    sample_batch_size: float | str | int = '1e7'
+        
+    def __post_init__(self):
+        self.sample_electrons  = int(float(self.sample_electrons))
+        self.sample_batch_size = int(float(self.sample_batch_size))
 
-    def read_laser_parameters(self):
+@dataclass
+class Control_Laser:
+    pulse_rescale_bias: float
+        
+@dataclass
+class Control_Detector:
+    a0_freq_correction: bool
+
+@dataclass
+class Control:
+    sampling: str
+    xsection: str
+    beam: Control_Beam
+    laser: Control_Laser
+    detector: Control_Detector
+        
+@dataclass
+class Unit:
+    momentum: str
+    position: str
+        
+    def __post_init__(self):
+        if self.position not in ('micron',):
+            raise ValueError
+
+        if self.momentum == 'eV':
+            self.momentum_scale = 1
+        elif self.momentum == 'keV':
+            self.momentum_scale = 1e3
+        elif self.momentum == 'MeV':
+            self.momentum_scale = 1e6
+        elif self.momentum == 'GeV':
+            self.momentum_scale = 1e9
+        else:
+            raise ValueError
 
 
-        self.omega0    = float( self.input_dict['laser']['omega0']  )
-        self.a0        = float( self.input_dict['laser']['a0']      )
-        self.TFWHM     = float( self.input_dict['laser']['TFWHM']  )
-        self.w0        = float( self.input_dict['laser']['w0']      )
-        self.poldegree = float( self.input_dict['laser']['poldegree']   )
-        self.polangle  = float( self.input_dict['laser']['polangle']    )
-        self.pulse     = self.input_dict['laser']['pulse']
+@dataclass
+class Beam:
+    gamma: float | str
+    energyspread: float | str
+    emittanceX: float | str
+    emittanceY: float | str
+    sigmaX: float | str
+    sigmaY: float | str
+    sigmaL: float | str
+    beam_charge: float | str
+    beam_focus_z: float | str
+    baseline: float | str
+        
+    def __post_init__(self):
+        self.gamma        = float(self.gamma)
+        self.energyspread = float(self.energyspread)
+        self.emittanceX   = float(self.emittanceX)
+        self.emittanceY   = float(self.emittanceY)
+        self.sigmaX       = float(self.sigmaX)
+        self.sigmaY       = float(self.sigmaY)
+        self.sigmaL       = float(self.sigmaL)
+        self.beam_charge  = float(self.beam_charge)
+        self.beam_focus_z = float(self.beam_focus_z)
+        self.baseline     = float(self.baseline)
 
-        if self.pulse!='cos2':
-            raise NotImplementedError
+@dataclass
+class Laser:
+    a0: float
+    omega0: float
+    TFWHM: float
+    pulse: str
+    w0: float
+    polangle: float
+    poldegree: float
+
+    def __post_init__(self):
+        # translate TFWHM==FWHM in fs --> sigma parameter which is dimensionless, specific for cos^2 envelope
+        self.sigma = 0.25*np.pi/np.arccos(1/2**0.25)/hbar * self.TFWHM * self.omega0
+        # print (0.25*np.pi/np.arccos(1/2**0.25)*c/hbarc , 2.0852201339)
+        # self.sigma = 2.0852201339 * self.TFWHM * self.omega0
+        # the numerical factor is 0.25*pi/arccos(1/2**(1/4)) * 1.52, where the factor 1.52 comes from the transition from eV to fs
+
+
+@dataclass
+class Detector:
+    # pdim:  int
+    omega: list[float | str]
+    theta: list[float | str]
+    phi:   list[float | str]
+
+    def __post_init__(self):
+        self.omega = [float(i) for i in self.omega]
+        self.theta = [float(i) for i in self.theta]
+        self.phi   = [float(i) for i in self.phi  ]
+
+
+        
+        
+@dataclass
+class PICA_Config:
+    control: Control
+    unit: Unit
+    beam: Beam
+    laser: Laser
+    detector: Detector
+ 
 
 
 
-    def read_beam_parameters(self):
-        # extracting beam parameters from the YML File
-        self.gamma0       = float( self.input_dict['beam']['gamma'] )
-        self.energyspread = float( self.input_dict['beam']['energyspread'] )
-        self.emittance_X  = float( self.input_dict['beam']['emittanceX'] )
-        self.emittance_Y  = float( self.input_dict['beam']['emittanceY'] )
-        self.beam_size_X  = float( self.input_dict['beam']['sigmaX'] )        # transverse beam size x axis in microns
-        self.beam_size_Y  = float( self.input_dict['beam']['sigmaY'] )        # transverse beam size y axis in microns
-        self.beam_length  = float( self.input_dict['beam']['sigmaL'] )        # longitudinal beam size in microns 
-        self.beam_charge  = float( self.input_dict['beam']['beam_charge'])
-        self.beam_focus_z = float( self.input_dict['beam']['beam_focus_z'])
-        self.baseline     = float( self.input_dict['beam']['baseline'])
 
-    def read_detector(self):
+# class ParameterReader():
 
-        # extract detector parameters
-        self.pdim           = int(self.input_dict['detector']['pdim'])
-        self.omega_detector = [float(w) for w in self.input_dict['detector']['omega']]
-        self.theta_detector = [float(t) for t in self.input_dict['detector']['theta']]
-        self.phi_detector   = [float(p) for p in self.input_dict['detector']['phi']]
+#     def __init__(self):
+#         pass
+
+#     def read_laser_parameters(self):
+
+
+#         self.omega0    = float( self.input_dict['laser']['omega0']  )
+#         self.a0        = float( self.input_dict['laser']['a0']      )
+#         self.TFWHM     = float( self.input_dict['laser']['TFWHM']  )
+#         self.w0        = float( self.input_dict['laser']['w0']      )
+#         self.poldegree = float( self.input_dict['laser']['poldegree']   )
+#         self.polangle  = float( self.input_dict['laser']['polangle']    )
+#         self.pulse     = self.input_dict['laser']['pulse']
+
+#         if self.pulse!='cos2':
+#             raise NotImplementedError
+
+
+
+#     def read_beam_parameters(self):
+#         # extracting beam parameters from the YML File
+#         self.gamma0       = float( self.input_dict['beam']['gamma'] )
+#         self.energyspread = float( self.input_dict['beam']['energyspread'] )
+#         self.emittance_X  = float( self.input_dict['beam']['emittanceX'] )
+#         self.emittance_Y  = float( self.input_dict['beam']['emittanceY'] )
+#         self.beam_size_X  = float( self.input_dict['beam']['sigmaX'] )        # transverse beam size x axis in microns
+#         self.beam_size_Y  = float( self.input_dict['beam']['sigmaY'] )        # transverse beam size y axis in microns
+#         self.beam_length  = float( self.input_dict['beam']['sigmaL'] )        # longitudinal beam size in microns 
+#         self.beam_charge  = float( self.input_dict['beam']['beam_charge'])
+#         self.beam_focus_z = float( self.input_dict['beam']['beam_focus_z'])
+#         self.baseline     = float( self.input_dict['beam']['baseline'])
+
+#     def read_detector(self):
+
+#         # extract detector parameters
+#         self.pdim           = int(self.input_dict['detector']['pdim'])
+#         self.omega_detector = [float(w) for w in self.input_dict['detector']['omega']]
+#         self.theta_detector = [float(t) for t in self.input_dict['detector']['theta']]
+#         self.phi_detector   = [float(p) for p in self.input_dict['detector']['phi']]
 
 
 class H5Writer():
@@ -99,9 +221,9 @@ class H5Writer():
 
 
             fs['photon/position']                     = self.X_photon.T
-            fs['photon/position'].attrs['unit']       = self.unit_X
+            fs['photon/position'].attrs['unit']       = self.config.unit.position
             fs['photon/momentum']                     = self.K_photon.T
-            fs['photon/momentum'].attrs['unit']       = self.unit_P
+            fs['photon/momentum'].attrs['unit']       = self.config.unit.momentum
             fs['photon/weight'  ]                     = self.W_photon
             fs['photon/weight'  ].attrs['unit']       = '1'
             fs['photon/polarization'  ]               = self.S_photon.T
@@ -113,9 +235,9 @@ class H5Writer():
 
 
             fs['electron/position']               = self.X_electron.T
-            fs['electron/position'].attrs['unit'] = self.unit_X
+            fs['electron/position'].attrs['unit'] = self.config.unit.position
             fs['electron/momentum']               = self.P_electron.T
-            fs['electron/momentum'].attrs['unit'] = self.unit_P
+            fs['electron/momentum'].attrs['unit'] = self.config.unit.momentum
             fs['electron/weight'  ]               = self.W_electron
             fs['electron/weight'  ].attrs['unit'] = '1'
 
@@ -149,26 +271,6 @@ def config_writer():
         b=ff.create_group('config')
 
     return True
-
-
-
-
-    return True
-
-# def write_finalstate(filename,omega,theta,spectrum):
-#     # final-state
-#         # photon
-#         # electron
-#         # omega
-#         # theta
-#         # phi
-#     with h5py.File(filename+'.h5' , 'w' ) as ff:
-#         finalstate = ff.create_group('final-state')
-#         finalstate['omega']=omega
-#         finalstate['theta']=theta
-#         finalstate['spectrum']=spectrum
-
-#     return
 
 
 class H5Reader():

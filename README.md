@@ -71,12 +71,6 @@ SIM.run()
 	* self.number_electrons
 	* cross section normalization benchmarked against PTARMIGAN
 	
-	
-## Plans for changes
-
-* clean up config/control blocks of input/output files
-* define 3 testbeams
-* Gaussian temporal structure for laser 
-* add circular polarization
-	
+* v1.2.9
+	* fixed the setup	
 	

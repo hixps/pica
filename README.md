@@ -1,6 +1,6 @@
 # pica
 
-Polarized ICS CAlculator
+*P*olarized *I*CS *Ca*lculator
 
 
 Simulate ICS gamma photon spectra for the LUXE experiment https://arxiv.org/abs/2102.02032.
@@ -26,7 +26,9 @@ Output files in PTARMIGAN-hdf5 format: https://github.com/tgblackburn/ptarmigan
 
 ```console
 pip install <path to pica source>
-	
+
+or
+
 pip install https://github.com/hixps/pica
 ```
 

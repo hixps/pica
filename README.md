@@ -1,6 +1,6 @@
 # pica
 
-Polarized ICS CAlculator
+*P*olarized *I*CS *Ca*lculator
 
 
 Simulate ICS gamma photon spectra for the LUXE experiment https://arxiv.org/abs/2102.02032.
@@ -11,12 +11,12 @@ Output files in PTARMIGAN-hdf5 format: https://github.com/tgblackburn/ptarmigan
 
 ## Source
 
-```https://github.com/hixps/pica'''
+```https://github.com/hixps/pica```
 
 
 ## Dependencies
 
-* `python >= 3.9`
+* `python >= 3.10`
 * `numpy`
 * `scipy`
 * `h5py`
@@ -24,15 +24,12 @@ Output files in PTARMIGAN-hdf5 format: https://github.com/tgblackburn/ptarmigan
 
 ## Installation
 
-```python
-python -m build;
-pip install dist/pica-<version number>.tar.gz 
-```
+```console
+pip install <path to pica source>
 
 or
 
-```python
-python setup.py install
+pip install https://github.com/hixps/pica
 ```
 
 
@@ -76,12 +73,6 @@ SIM.run()
 	* self.number_electrons
 	* cross section normalization benchmarked against PTARMIGAN
 	
-	
-## Plans for changes
-
-* clean up config/control blocks of input/output files
-* define 3 testbeams
-* Gaussian temporal structure for laser 
-* add circular polarization
-	
+* v1.2.9
+	* fixed the setup	
 	

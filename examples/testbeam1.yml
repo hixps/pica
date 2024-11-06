@@ -20,8 +20,8 @@ unit:
 beam:
   gamma:        30000
   energyspread: 1e-3
-  emittanceX:   1.5           # mm mrad
-  emittanceY:   1.5           # mm mrad
+  emittanceX:   0.0           # mm mrad
+  emittanceY:   0.0           # mm mrad
   sigmaX:       5.            # micron, transverse beam size
   sigmaY:       5.            # micron, transverse beam size
   sigmaL:       20.           # micron, longitduinal beam size

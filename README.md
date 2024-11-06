@@ -29,7 +29,7 @@ pip install <path to pica source>
 
 or
 
-pip install https://github.com/hixps/pica
+pip install git+https://github.com/hixps/pica.git
 ```
 
 

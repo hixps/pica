@@ -94,7 +94,7 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
         # else:
         #     raise ValueError
 
-        self.number_electrons = self.config.beam.beam_charge / elementary_charge_si
+        self.number_electrons = self.config.beam.charge / elementary_charge_si
         self.electron_weight  = self.number_electrons / self.config.control.beam.sample_electrons
 
 
@@ -172,10 +172,10 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
         #Mean and Covariant matrices for bivariate gaussian
         
         mean_x = [0,0]  # x-offset and x' offset for focus 
-        cov_x = beam_covariance_matrix(self.config.beam.sigmaX, rms_angle_X, self.config.beam.beam_focus_z )
+        cov_x = beam_covariance_matrix(self.config.beam.sigmaX, rms_angle_X, self.config.beam.focus_z )
 
         mean_y = [0,0]  # y-offset and y' offset for focus
-        cov_y = beam_covariance_matrix(self.config.beam.sigmaY, rms_angle_Y, self.config.beam.beam_focus_z )
+        cov_y = beam_covariance_matrix(self.config.beam.sigmaY, rms_angle_Y, self.config.beam.focus_z )
 
         
         #Sampling (x,x') and (y,y')
@@ -269,7 +269,7 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
         sampled_x       = x[selector1]
         sampled_y       = y[selector1]
 
-        sampled_zeta    = np.random.normal( 0 , self.config.beam.sigmaL  , number_photons )
+        sampled_zeta    = np.random.normal( 0 , self.config.beam.sigmaZ  , number_photons )
         sampled_z       = +0.5 * sampled_zeta
         sampled_t       = -0.5 * sampled_zeta
 
@@ -352,7 +352,7 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
 #######################################################################################################################################
 
 
-
+"""
 class AtomicSimulation(H5Writer, H5Reader, ICSAnalysis):
 
     def __init__(self, input_filename ):
@@ -659,6 +659,6 @@ class AtomicSimulation(H5Writer, H5Reader, ICSAnalysis):
 
 
         print ('   total photon number:',len(self.W_electron))
-
+"""
 
 

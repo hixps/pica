@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name    = "pica"
+name = "pica"
 dynamic = ["version", "readme"]
-#version = "1.2.9"
+license = {file = "LICENSE"}
 dependencies = [
                 "numpy >= 2.0",
                 "scipy",
@@ -14,43 +14,20 @@ dependencies = [
                 "h5py"
                 ]
 requires-python = ">=3.10"
-authors = [{name="Daniel Seipt", email="d.seipt@hi-jena.gsi.de"}]
-maintainers = []
-description = ""
+authors = [{name="Daniel Seipt", email="d.seipt@hi-jena.gsi.de"},
+           {name="Dupish Dupish"}]
+description = "High-Energy Polarized ICS Gamma-Ray Simulations"
+keywords = ["ICS", "hixps", "LUXE", "gamma rays", "gamma source", "scattering"]
+
 
 [project.optional-dependencies]
 
 
 [project.urls]
-repository = "https://github.com/hixps/pica"
+Repository = "https://github.com/hixps/pica"
 
 
 [tool.setuptools.dynamic]
 readme = {file = ["README.md"]}
-version = {attr = "pica.__version__.__version__"}               # any module attribute compatible with ast.literal_eval
-
-# """
-# [metadata]
-# version = attr: pica.__version__.__version__
-# author = Daniel Seipt, Dupish
-# author_email = d.seipt@hi-jena.gsi.de
-# description = High-Energy Polarized ICS Gamma-Ray Simulations
-# long_description = file: README.md
-# keywords = hixps, radiation, LUXE,
-# classifiers =
-#     Programming Language :: Python :: 3
-# url = https://github.com/hixps/pica
-
-
-# [options]
-# zip_safe = False
-# packages = 
-#     pica
-# python_requires = >=3.9
-# install_requires =
-#     numpy
-#     scipy
-#     pyyaml
-#     h5py
-# """
+version = {attr = "pica.__version__.__version__"}
 

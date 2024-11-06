@@ -16,7 +16,7 @@ Output files in PTARMIGAN-hdf5 format: https://github.com/tgblackburn/ptarmigan
 
 ## Dependencies
 
-* `python >= 3.9`
+* `python >= 3.10`
 * `numpy`
 * `scipy`
 * `h5py`
@@ -24,15 +24,10 @@ Output files in PTARMIGAN-hdf5 format: https://github.com/tgblackburn/ptarmigan
 
 ## Installation
 
-```python
-python -m build;
-pip install dist/pica-<version number>.tar.gz 
-```
-
-or
-
-```python
-python setup.py install
+```shell
+pip install <path to pica source>
+	
+pip install https://github.com/hixps/pica
 ```
 
 

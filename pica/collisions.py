@@ -2,7 +2,7 @@ import numpy as np
 import yaml
 import h5py
 
-from scipy.integrate import cumtrapz
+#from scipy.integrate import cumulative_trapezoidal
 
 from .constants import hbarc,c, elec_mass,finestruct, joule_per_eV
 from .spectrum  import Compton_Spectrum_Full
@@ -29,7 +29,6 @@ class ICSAnalysis():
         return phi
 
 
-    # rotated Stokes parameters in lab frame
     @property
     def S1_scatteringplane(self):
         _,Stokes1,Stokes2,_ = self.S_photon

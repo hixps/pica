@@ -24,9 +24,9 @@ beam:
   emittanceY:   1.5           # mm mrad
   sigmaX:       10.           # micron, transverse beam size
   sigmaY:       10.           # micron, transverse beam size
-  sigmaL:       20.           # micron, longitduinal beam size
-  beam_charge:  100e-12       # beam charge in Coulomb
-  beam_focus_z: 0             # Focus position of electron beam, 0 = ICS interaction point, in microns
+  sigmaZ:       20.           # micron, longitduinal beam size
+  charge:       100e-12       # beam charge in Coulomb
+  focus_z:      0             # Focus position of electron beam, 0 = ICS interaction point, in microns
   baseline:     7.5e6         # Distance between ICS and Stong IP in microns
 
 
@@ -41,7 +41,6 @@ laser:
 
 
 detector:                           # spectrum calculation
-  pdim:  3                          # number of detector dimensions for spectrum calculation
   omega: [1.5e9,4.5e9]               # [omegamin,omegamax] , eV
   theta: [0,50e-6]                 # [thetamin,thetamax] , rad
   phi:   [0.0,6.283185307179586]    # [phimin,phimax]     , rad

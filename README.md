@@ -11,7 +11,7 @@ Output files in PTARMIGAN-hdf5 format: https://github.com/tgblackburn/ptarmigan
 
 ## Source
 
-```https://github.com/hixps/pica'''
+```https://github.com/hixps/pica```
 
 
 ## Dependencies

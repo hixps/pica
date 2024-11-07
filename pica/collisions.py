@@ -52,6 +52,13 @@ class ICSAnalysis():
         return PolDegree
 
     @property
+    def PolarizationTiltAngle(self):
+        _,Stokes1,Stokes2,_ = self.S_photon
+        angle = 0.5*np.arctan2(Stokes2,Stokes1)
+        return angle
+    
+
+    @property
     def thetax(self):
         _,K1,_,K3 =  self.K_photon
         _thetax = np.arctan2(K1,K3)
@@ -97,7 +104,8 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
 
 
         # energy specific for cos^2 envelope
-        self.total_energy    = 3/32 * self.config.laser.omega0 * ( 0.5*self.config.laser.a0**2 ) * elec_mass**2 / finestruct * self.config.laser.w0**2 * self.config.laser.sigma / hbarc**2
+        self.total_energy    = 3/32 * self.config.laser.omega0 * ( 0.5*self.config.laser.a0**2 ) * elec_mass**2 \
+                                / finestruct * self.config.laser.w0**2 * self.config.laser.sigma / hbarc**2
         self.total_energy_J  = self.total_energy * joule_per_eV
 
 
@@ -156,7 +164,7 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
 
 
 
-    def generate_electron_beam(self, number_sample_electrons):
+    def sample_electrons_beam(self, number_sample_electrons ):
         
         
         # rms angles for x and y space
@@ -174,21 +182,19 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
 
         
         #Sampling (x,x') and (y,y')
-        x,theta_x = np.random.multivariate_normal(mean_x, cov_x, number_sample_electrons).T
-        y,theta_y = np.random.multivariate_normal(mean_y, cov_y, number_sample_electrons).T
-        
-        
-        
-        gamma        = np.random.normal( self.config.beam.gamma , self.config.beam.gamma*self.config.beam.energyspread , number_sample_electrons )
-        beta         = np.sqrt(1-1./gamma**2)
+        x, theta_x   = np.random.multivariate_normal(mean_x, cov_x, number_sample_electrons ).T
+        y, theta_y   = np.random.multivariate_normal(mean_y, cov_y, number_sample_electrons ).T
+            
+        gamma        = np.random.normal( self.config.beam.gamma, self.config.beam.gamma*self.config.beam.energyspread, number_sample_electrons )
+        beta         = np.sqrt(1 - 1./gamma**2)
+        theta        = np.sqrt(theta_x**2 + theta_y**2)
+        phi          = np.arctan2(theta_y, theta_x)
 
-        
-        pz0          = gamma*beta*np.cos(theta_x)*np.cos(theta_y)
-        px0          = gamma*beta*np.sin(theta_x)
-        py0          = gamma*beta*np.sin(theta_y)
-        pt0          = np.sqrt( 1 + px0**2 + py0**2 + pz0**2 )
+        pz          = gamma*beta*np.cos(theta)
+        px          = gamma*beta*np.sin(theta)*np.cos(phi)
+        py          = gamma*beta*np.sin(theta)*np.sin(phi)
 
-        return x,theta_x,y,theta_y,gamma,pt0,px0,py0,pz0
+        return x,theta_x, y,theta_y, gamma,px,py,pz
 
 
 
@@ -199,8 +205,7 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
         print (f'  > batch {jj:03d}: {number_sample_electrons:.2g} macroelectrons of weight {self.electron_weight:.5g}')
         
         # define electron beam with correlated phase space
-        x,theta_x,y,theta_y,gamma,pt0,px0,py0,pz0 = self.generate_electron_beam( number_sample_electrons )
-
+        x,theta_x, y,theta_y, gamma,px,py,pz = self.sample_electrons_beam( number_sample_electrons )
 
         # radial position of electron at the interaction point        
         r            = np.sqrt( x**2 + y**2 )
@@ -208,34 +213,34 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
         # peak value of laser intensity at electron radial location
         xi_peak      = self.config.laser.a0 * np.exp( -r**2/self.config.laser.w0**2 )
 
-
-        U_in         = np.asarray([pt0,px0,py0,pz0])
+        # initial electron four velocity / normalized momentum
+        U_in         = np.asarray([gamma,px,py,pz])
 
         
         # random photon kinematics in detector range
         omega        = np.random.uniform( *self.config.detector.omega, number_sample_electrons ) 
         theta        = np.random.uniform( *self.config.detector.theta, number_sample_electrons ) 
         phi          = np.random.uniform( *self.config.detector.phi  , number_sample_electrons )
-        # omega        = np.random.uniform(*self.detector.omega[0], self.omega_detector[1], number_sample_electrons) 
-        # theta        = np.random.uniform(self.theta_detector[0], self.theta_detector[1], number_sample_electrons) 
-        # phi          = np.random.uniform(self.phi_detector[0]  , self.phi_detector[1]  , number_sample_electrons)
+
         
 
-        Spectrum_object = self.Compton_Spectrum( U_in , xi_peak , 
-                                                    self.config.laser.omega0 , self.config.laser.sigma / self.config.control.laser.pulse_rescale_bias , 
-                                                    omega, theta, phi, 
-                                                    self.config.laser.poldegree, self.config.laser.polangle, 
-                                                    self.config.control.detector.a0_freq_correction )
+        Spectrum_Calculator = self.Compton_Spectrum( U_in , xi_peak , 
+                                                 omega, theta, phi, 
+                                                 omega0 = self.config.laser.omega0,
+                                                 sigma = self.config.laser.sigma / self.config.control.laser.pulse_rescale_bias, 
+                                                 laser_poldegree = self.config.laser.poldegree,
+                                                 laser_polangle = self.config.laser.polangle, 
+                                                 a0_freq_correction = self.config.control.detector.a0_freq_correction )
 
-        rad_int         = Spectrum_object.cross_section()
-
-
-        spectrum = self.config.control.laser.pulse_rescale_bias * rad_int * np.sin(theta)
-        spec_max = np.amax(spectrum)
+        rad_int             = Spectrum_Calculator.cross_section()
 
 
+        spectrum            = self.config.control.laser.pulse_rescale_bias * rad_int * np.sin(theta)
+        spec_max            = np.amax(spectrum)
 
-        s_val        = np.random.uniform(0             , spec_max,       number_sample_electrons )
+
+
+        s_val               = np.random.uniform(0, spec_max, number_sample_electrons )
 
 
         samplingvolume     = spec_max * (self.config.detector.omega[1]-self.config.detector.omega[0]) \
@@ -252,11 +257,6 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
         print ('   number photons     :' , number_photons)
 
 
-
-        # sampled_gamma   = gamma[selector1]
-        # sampled_theta_x = theta_x[selector1]
-        # sampled_theta_y = theta_y[selector1]
-
         sampled_omega   = omega[selector1]
         sampled_theta   = theta[selector1]
         sampled_phi     = phi[selector1]
@@ -269,7 +269,7 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
         sampled_t       = -0.5 * sampled_zeta
 
 
-        sampled_U_in  = np.asarray([pt0[selector1],px0[selector1],py0[selector1],pz0[selector1]])
+        sampled_U_in  = np.asarray([gamma[selector1], px[selector1], py[selector1], pz[selector1]])
 
 
         sampled_xi_peak = xi_peak[selector1]
@@ -289,20 +289,22 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
 
 
         # electrons that have emitted
-        P1           = px0[selector1] * elec_mass - K1
-        P2           = py0[selector1] * elec_mass - K2
-        P3           = pz0[selector1] * elec_mass - K3 
+        P1           = px[selector1] * elec_mass - K1
+        P2           = py[selector1] * elec_mass - K2
+        P3           = pz[selector1] * elec_mass - K3 
         P0           = np.sqrt( elec_mass**2 + P1**2 + P2**2 + P3**2 )
 
 
         # Calculation of Stokes Parameters of emitted Photons
-        sampled_Spectrum_object = self.Compton_Spectrum( sampled_U_in , sampled_xi_peak , 
-                                                    self.config.laser.omega0 , self.config.laser.sigma / self.config.control.laser.pulse_rescale_bias , 
-                                                    sampled_omega, sampled_theta, sampled_phi, 
-                                                    self.config.laser.poldegree, self.config.laser.polangle, 
-                                                    self.config.control.detector.a0_freq_correction )
+        Sampled_Spectrum_Calculator = self.Compton_Spectrum( sampled_U_in , sampled_xi_peak , 
+                                                             sampled_omega, sampled_theta, sampled_phi, 
+                                                            omega0 = self.config.laser.omega0,
+                                                            sigma = self.config.laser.sigma / self.config.control.laser.pulse_rescale_bias, 
+                                                            laser_poldegree = self.config.laser.poldegree,
+                                                            laser_polangle = self.config.laser.polangle, 
+                                                            a0_freq_correction = self.config.control.detector.a0_freq_correction )
         
-        S1_sp, S2_sp, S3    = sampled_Spectrum_object.StokesParameters()
+        S1_sp, S2_sp, S3    = Sampled_Spectrum_Calculator.StokesParameters()
 
         S1 = np.cos(2*sampled_phi) * S1_sp - np.sin(2*sampled_phi) * S2_sp
         S2 = np.sin(2*sampled_phi) * S1_sp + np.cos(2*sampled_phi) * S2_sp

@@ -35,24 +35,22 @@ def L_parameter_a0correction(y,s,b0,a0):
 
 
 
-class Compton_Spectrum():
+class _Compton_Spectrum():
 
-    def __init__(self, U_in , a0 , omega0 , sigma , omega, theta, phi , laser_poldegree , laser_polangle , a0_freq_correction ):
+    def __init__(self, U_in , a0 , omega, theta, phi , omega0 , sigma, laser_poldegree , laser_polangle , a0_freq_correction ):
 
         self.U_in = U_in
         self.a0   = a0
-        self.omega0 = omega0
-        self.sigma  = sigma
 
         self.omega  = omega
         self.theta  = theta
         self.phi    = phi
 
-        
+
+        self.omega0 = omega0
+        self.sigma  = sigma
         self.laser_poldegree   = laser_poldegree
         self.laser_polangle    = laser_polangle
-
-
         self.a0_freq_correction = a0_freq_correction
 
 
@@ -109,10 +107,10 @@ class Compton_Spectrum():
 
 
 
-class Compton_Spectrum_Full(Compton_Spectrum):
+class Compton_Spectrum_Full(_Compton_Spectrum):
 
     def __init__(self, *args, **kwargs):
-        Compton_Spectrum.__init__(self, *args, **kwargs)
+        _Compton_Spectrum.__init__(self, *args, **kwargs)
 
     @property
     def Ein(self):
@@ -125,7 +123,7 @@ class Compton_Spectrum_Full(Compton_Spectrum):
 
     @property
     def Ein_ortho(self):
-        #needed if incident laser is not fully polarized
+        # needed if incident laser is not fully polarized
         Ein_0 = 0
         Ein_1 = np.sin(self.laser_polangle)
         Ein_2 = -np.cos(self.laser_polangle)
@@ -150,7 +148,7 @@ class Compton_Spectrum_Full(Compton_Spectrum):
         E2_1   = -np.sin(self.phi)
         E2_2   = np.cos(self.phi)
         E2_3   = 0  
-        return (E2_0,E2_1,E2_2,E2_3)  
+        return (E2_0, E2_1, E2_2, E2_3)  
 
     @property
     def U_out(self):

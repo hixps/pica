@@ -1,6 +1,6 @@
 control:
   beam:
-    sample_electrons:  3e6         # total number of macroelectrons electrons to sample
+    sample_electrons:  5e6         # total number of macroelectrons electrons to sample
     sample_batch_size: 1e6         # number of macroelectrons per batch
   laser:
     pulse_rescale_bias:    1.      # > 1 for better sampling at the cost of larger natural bandwidth, use carfully
@@ -14,11 +14,11 @@ unit:
 
 
 beam:
-  gamma:        30000
+  gamma:        10000
   energyspread: 1e-3
   emittanceX:   0.0           # mm mrad
   emittanceY:   0.0           # mm mrad
-  sigmaX:       5.            # micron, transverse beam size
+  sigmaX:       10.           # micron, transverse beam size
   sigmaY:       5.            # micron, transverse beam size
   sigmaZ:       20.           # micron, longitduinal beam size
   charge:       100e-12       # beam charge in Coulomb
@@ -33,11 +33,11 @@ laser:
   pulse:        cos2          # pulse envelope function, only cos2 supported so far
   w0:           5.            # micron, rms laser spot size
   poldegree:    1.            # laser linear polarization degree
-  polangle:     0.            # laser polarization angle from x-axis in rad
+  polangle:     1.5707963268  # laser polarization angle from x-axis in rad
 
 
 detector:                           # spectrum calculation
-  omega: [1.5e9,4.5e9]              # [omegamin,omegamax] , eV
-  theta: [0,50e-6]                  # [thetamin,thetamax] , rad
+  omega: [0.2e9,0.6e9]              # [omegamin,omegamax] , eV
+  theta: [0,120e-6]                  # [thetamin,thetamax] , rad
   phi:   [0.0,6.283185307179586]    # [phimin,phimax]     , rad
 

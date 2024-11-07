@@ -3,7 +3,7 @@ control:
     sample_electrons:  3e6         # total number of macroelectrons electrons to sample
     sample_batch_size: 1e6         # number of macroelectrons per batch
   laser:
-    pulse_rescale_bias:    1.      # > 1 for better sampling at the cost of larger natural bandwidth, use carfully
+    pulse_rescale_bias:    2.      # > 1 for better sampling at the cost of larger natural bandwidth, use carfully
   detector:
     a0_freq_correction: True       # include a0-dependent frequency red-shift 
 
@@ -31,13 +31,13 @@ laser:
   omega0:       1.55          # eV, laser frequency 
   TFWHM:        30.0          # fs, FWHM laser pulse duration
   pulse:        cos2          # pulse envelope function, only cos2 supported so far
-  w0:           5.            # micron, rms laser spot size
+  w0:           10.           # micron, rms laser spot size
   poldegree:    1.            # laser linear polarization degree
   polangle:     0.            # laser polarization angle from x-axis in rad
 
 
 detector:                           # spectrum calculation
-  omega: [1.5e9,4.5e9]              # [omegamin,omegamax] , eV
-  theta: [0,50e-6]                  # [thetamin,thetamax] , rad
-  phi:   [0.0,6.283185307179586]    # [phimin,phimax]     , rad
+  omega: [2.2e9,4.5e9]              # [omegamin,omegamax] , eV
+  theta: [0,30e-6]                  # [thetamin,thetamax] , rad
+  phi:   [0.9,4.7]                  # [phimin,phimax]     , rad
 

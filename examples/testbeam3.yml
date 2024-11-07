@@ -1,13 +1,9 @@
 control:
-  sampling:         rejection       # only rejection sampling is implemented currently
-  xsection:         Full
   beam:
     sample_electrons:  2e7         # total number of macroelectrons electrons to sample
     sample_batch_size: 1e7         # number of macroelectrons per batch
-
-  # rescaling of pulse duration
   laser:
-    pulse_rescale_bias:    1.       # > 1 for better sampling at the cost of larger natural bandwidth
+    pulse_rescale_bias:    1.      # > 1 for better sampling at the cost of larger natural bandwidth, use carfully
   detector:
     a0_freq_correction: True       # include a0-dependent frequency red-shift 
 

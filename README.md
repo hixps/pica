@@ -38,7 +38,7 @@ pip install git+https://github.com/hixps/pica.git
 ```python
 import pica
 
-SIM =  pica.ICSSimulation( input_filename='input_file' )
+SIM = pica.ICSSimulation( input_filename='input_file' )
 SIM.run()
 ```
 

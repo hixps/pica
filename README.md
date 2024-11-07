@@ -2,16 +2,13 @@
 
 **P**olarized **I**CS **Ca**lculator
 
+Monte Carlo code for the simulation of Inverse Compton Scattering gamma-ray spectra including the photon polarization.
+The primary usage is for the LUXE experiment https://arxiv.org/abs/2102.02032.
 
-Simulate ICS gamma photon spectra for the LUXE experiment https://arxiv.org/abs/2102.02032.
-
-Input files in ```yaml``` format
-
-Output files in PTARMIGAN-hdf5 format: https://github.com/tgblackburn/ptarmigan
 
 ## Source
 
-```https://github.com/hixps/pica```
+https://github.com/hixps/pica
 
 
 ## Dependencies
@@ -27,9 +24,11 @@ Output files in PTARMIGAN-hdf5 format: https://github.com/tgblackburn/ptarmigan
 
 ```console
 pip install <path to pica source>
+```
 
 or
 
+```console
 pip install git+https://github.com/hixps/pica.git
 ```
 
@@ -46,22 +45,26 @@ SIM.run()
 
 ## Input
 
+Input files for configuring the simulation in the `yaml` format.
+
+
 
 ## Output
+
+Simulation output files are `hdf5` in PTARMIGAN-compatible format: https://github.com/tgblackburn/ptarmigan
 
 
 ## Changelog
 
-* v1.2.0 
-	* linear laser polarization and linear Stokes parameters of gamma rays
-* v1.2.1
-	* laser polarization control via polarization angle (only LP, 100% polarization degree)
-	* "Full" polarized cross section based on Jauch-Rohrlich expression with explicit polarization vectors
-	* Analysis routines for rotating Stokes vectors from scattering plane to laboratory frame	
-* v1.2.2
-	* partially polarized laser	
-* v1.2.3
-	* software rename luxeics -> pica
+
+* v1.2.9
+	* fixed the setup	
+* v1.2.8
+	* self.number_electrons
+	* cross section normalization benchmarked against PTARMIGAN	
+* v1.2.5
+	* Stokes parameters in the x-z plane are now standard
+	* Implemented methods to calculate Stokes parameters in scattering plane
 * v1.2.4
 	* switched Stokes parameter definition to S3=circular
 	* Stokes parameter S0=1 for consistency with PTARMIGAN
@@ -72,14 +75,9 @@ SIM.run()
 		* config/unit/momentum = ('eV','keV','MeV','GeV')
 	* pulse length parameter renamed to TFWHM
 	* cleanup of old cross sections, only Cross_Section_Full useable
-* v1.2.5
-	* Stokes parameters in the x-z plane are now standard
-	* Implemented methods to calculate Stokes parameters in scattering plane
 
-* v1.2.8
-	* self.number_electrons
-	* cross section normalization benchmarked against PTARMIGAN
+
+
 	
-* v1.2.9
-	* fixed the setup	
+
 	

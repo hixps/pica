@@ -2,16 +2,15 @@ import numpy as np
 import yaml
 import h5py
 
-#from scipy.integrate import cumulative_trapezoidal
 import dacite
 
 
-from .constants import hbarc,c, elec_mass,finestruct, joule_per_eV, elementary_charge_si
-from .spectrum  import Compton_Spectrum_Full
+from .constants import hbarc, c, elec_mass, finestruct, joule_per_eV, elementary_charge_si
+from .spectrum  import Compton_Spectrum_Full as Compton_Spectrum
 from .__init__  import __version__
 from .auxiliary import beam_covariance_matrix, gaussian_sum_normalized
-from .inout     import PICA_Config, H5Writer, H5Reader #, ParameterReader
-
+from .input     import PICA_Config, H5Reader
+from .output    import H5Writer
 
 
 """
@@ -89,13 +88,12 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
 
         self.config    = dacite.from_dict(data_class=PICA_Config, data=self.input_dict)
 
-        # if self.config.control.xsection=='Full':
-        self.Compton_Spectrum = Compton_Spectrum_Full
-        # else:
-        #     raise ValueError
+
+
+        self.Compton_Spectrum = Compton_Spectrum
 
         self.number_electrons = self.config.beam.charge / elementary_charge_si
-        self.electron_weight  = self.number_electrons / self.config.control.beam.sample_electrons
+        self.electron_weight  = self.number_electrons   / self.config.control.beam.sample_electrons
 
 
         # energy specific for cos^2 envelope
@@ -103,15 +101,12 @@ class ICSSimulation(H5Writer, H5Reader, ICSAnalysis):
         self.total_energy_J  = self.total_energy * joule_per_eV
 
 
-        # self.pulse_rescale_bias = float( self.input_dict['control']['laser']['pulse_rescale_bias']  )
 
 
-        print (f' >> pulse rescaling bias: {self.config.control.laser.pulse_rescale_bias:02.2f}: sigma = {self.config.laser.sigma:.2f}     -> {self.config.laser.sigma/self.config.control.laser.pulse_rescale_bias:.2f}    ')
-        print (f'                              : TFWHM = {self.config.laser.TFWHM:.2f} fs -> {self.config.laser.TFWHM/self.config.control.laser.pulse_rescale_bias:.2f} fs')
-
-
-
-        # self.a0_freq_correction = bool(self.input_dict['control']['detector']['a0_freq_correction'])
+        print (f' >> pulse rescaling bias: {self.config.control.laser.pulse_rescale_bias:02.2f}:'
+               f' sigma = {self.config.laser.sigma:.2f}    -> {self.config.laser.sigma/self.config.control.laser.pulse_rescale_bias:.2f}')
+        print (f'                                :'
+               f' TFWHM = {self.config.laser.TFWHM:.2f} fs -> {self.config.laser.TFWHM/self.config.control.laser.pulse_rescale_bias:.2f} fs')
 
 
         # initialize ouput arrays

@@ -14,7 +14,7 @@ https://github.com/hixps/pica
 ## Dependencies
 
 * `python >= 3.10`
-* `numpy`
+* `numpy >= 2.0`
 * `scipy`
 * `h5py`
 * `pyyaml`

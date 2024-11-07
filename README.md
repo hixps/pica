@@ -1,4 +1,4 @@
-# PICA
+# pica
 
 **P**olarized **I**CS **Ca**lculator
 
